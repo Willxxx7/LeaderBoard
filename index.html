@@ -187,17 +187,26 @@
     return;
   }
   
-  const site = prompt('Site URL (example: https://username.github.io/repo):\nMust contain "github.io"');
-  if (!site || !site.includes('github.io')) {
-    alert('❌ Site must contain "github.io"!');
+  const site = prompt('Site URL:\nExample: https://username.github.io/repo-name');
+  if (!site || !site.trim() === '') {
+    alert('❌ Site URL required!');
     return;
   }
   
-  const repo = prompt('Repo URL (example: https://github.com/username/repo):\nMust contain "github.com"');
-  if (!repo || !repo.includes('github.com')) {
-    alert('❌ Repo must contain "github.com"!');
-    return;
-  }
+  // ✅ ONLY SITE URL NEEDED
+  pending.unshift({
+    name: name.trim(), 
+    site: site.trim(),
+    repo: 'github.com/' + site.split('.')[0],  // Auto-generate repo link
+    id: Date.now() + Math.random(),
+    timestamp: new Date().toLocaleString()
+  });
+  
+  localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+  renderPending();
+  alert(`✅ "${name}" added! 🚀 Click WEBPAGETEST APPROVE`);
+}
+}
   
   // ✅ SUCCESS - Add to pending
   pending.unshift({
@@ -347,6 +356,7 @@
   </script>
 </body>
 </html>
+
 
 
 
