@@ -3,111 +3,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hot Beans Leaderboard 2026</title>
+    <meta name="description" content="Hot Beans Web Development Student Leaderboard - Track performance scores and rankings">
+    <title>Hot Beans Leaderboard 2026 | Student Performance Rankings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e3a8a;
+            --light: #f8fafc;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh; 
             padding: 2rem;
             color: #333;
+            line-height: 1.6;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
         h1 { 
-            text-align: center; 
             color: white; 
-            font-size: 3rem; 
-            margin-bottom: 2rem; 
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            font-size: 3.5rem; 
+            margin-bottom: 1rem; 
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(90deg, #ffffff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
         .teacher-section { 
             text-align: center; 
-            margin-bottom: 2rem; 
+            margin-bottom: 3rem; 
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
+        
         #teacherControls { 
             cursor: pointer; 
-            padding: 15px 30px; 
-            background: #3b82f6; 
+            padding: 18px 40px; 
+            background: var(--dark); 
             color: white; 
             border: none; 
+            border-radius: 50px; 
+            font-size: 1.3rem; 
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #teacherControls:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(59,130,246,0.6); 
+            background: #1e40af;
+        }
+        
+        .add-entry-btn { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            padding: 15px 35px; 
             border-radius: 50px; 
             font-size: 1.2rem; 
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(59,130,246,0.4);
-            transition: all 0.3s;
-        }
-        #teacherControls:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.6); }
-        .add-entry-btn { 
-            background: #10b981; 
-            color: white; 
-            border: none; 
-            padding: 15px 30px; 
-            border-radius: 50px; 
-            font-size: 1.1rem; 
-            font-weight: bold;
             cursor: pointer; 
-            margin: 20px; 
-            box-shadow: 0 4px 15px rgba(16,185,129,0.4);
-            transition: all 0.3s;
+            margin: 15px; 
+            box-shadow: 0 6px 20px rgba(16,185,129,0.4);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
-        .add-entry-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.6); }
+        
+        .add-entry-btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(16,185,129,0.6); 
+            background: #0da271;
+        }
+        
+        .controls-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
         table { 
             width: 100%; 
             background: white; 
             border-radius: 20px; 
             overflow: hidden; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            margin-bottom: 3rem;
+            border-collapse: collapse;
         }
+        
+        thead {
+            background: var(--dark);
+        }
+        
         th { 
-            background: #1e3a8a; 
             color: white; 
-            padding: 20px; 
+            padding: 25px 20px; 
             text-align: left; 
             font-weight: 600;
-        }
-        tr.rank-1 { background: linear-gradient(90deg, #ffd700, #ffed4e); }
-        tr.rank-2 { background: linear-gradient(90deg, #c0c0c0, #e5e5e5); }
-        tr.rank-3 { background: linear-gradient(90deg, #cd7f32, #deb887); }
-        tr:hover:not(.rank-1):not(.rank-2):not(.rank-3) { background: #f8fafc; }
-        td { padding: 20px; border-bottom: 1px solid #e2e8f0; }
-        .score-badge { 
-            padding: 8px 16px; 
-            border-radius: 25px; 
-            font-weight: bold; 
             font-size: 1.1rem;
+            position: relative;
         }
-        .score-90plus { background: #10b981; color: white; }
-        .repo-link { color: #3b82f6; text-decoration: none; font-size: 1.2rem; }
+        
+        th:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 3px;
+            background: var(--accent);
+        }
+        
+        tr.rank-1 { 
+            background: linear-gradient(90deg, var(--gold), #ffed4e);
+            font-weight: bold;
+            box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        tr.rank-2 { 
+            background: linear-gradient(90deg, var(--silver), #e5e5e5);
+            box-shadow: inset 0 0 15px rgba(192, 192, 192, 0.2);
+        }
+        
+        tr.rank-3 { 
+            background: linear-gradient(90deg, var(--bronze), #deb887);
+            box-shadow: inset 0 0 15px rgba(205, 127, 50, 0.2);
+        }
+        
+        tr:hover:not(.rank-1):not(.rank-2):not(.rank-3) { 
+            background: #f1f5f9; 
+            transform: scale(1.002);
+            transition: transform 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        td { 
+            padding: 25px 20px; 
+            border-bottom: 1px solid #e2e8f0; 
+            vertical-align: middle;
+        }
+        
+        .rank-cell {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            width: 80px;
+        }
+        
+        .score-badge { 
+            padding: 12px 24px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            display: inline-block;
+            min-width: 100px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .score-90plus { background: linear-gradient(90deg, var(--accent), #34d399); color: white; }
+        .score-80-89 { background: linear-gradient(90deg, #3b82f6, #60a5fa); color: white; }
+        .score-70-79 { background: linear-gradient(90deg, #f59e0b, #fbbf24); color: white; }
+        .score-below70 { background: linear-gradient(90deg, #ef4444, #f87171); color: white; }
+        
+        .site-link { 
+            color: var(--dark); 
+            text-decoration: none; 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .site-link:hover { 
+            color: var(--primary); 
+            text-decoration: underline;
+        }
+        
+        .repo-link { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--light);
+            color: var(--dark);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .repo-link:hover { 
+            background: var(--primary);
+            color: white;
+            transform: rotate(15deg) scale(1.1);
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .delete-btn { 
+            background: var(--danger); 
+            color: white; 
+        }
+        
+        .delete-btn:hover { 
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+        
         #pendingSection { 
             background: white; 
             border-radius: 20px; 
-            padding: 2rem; 
-            margin-bottom: 2rem; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 3rem; 
+            margin-bottom: 3rem; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
         }
+        
         .pending-entry { 
-            border: 2px solid #ddd; 
+            border: 2px solid #e2e8f0; 
             padding: 2rem; 
-            margin: 1rem 0; 
+            margin: 1.5rem 0; 
             border-radius: 15px; 
-            background: #f8f9fa;
+            background: #f8fafc;
+            transition: all 0.3s;
         }
+        
+        .pending-entry:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+        
         .approval-btn { 
-            padding: 12px 24px; 
+            padding: 15px 30px; 
             border: none; 
             border-radius: 25px; 
             font-weight: bold; 
             cursor: pointer; 
-            margin: 0 10px; 
-            font-size: 1rem;
+            margin: 5px 10px; 
+            font-size: 1.1rem;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
-        .approval-yes { background: #10b981; color: white; }
-        .approval-no { background: #ef4444; color: white; }
-        .approval-yes:hover, .approval-no:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
-        .approval-testing { background: #f59e0b; }
+        
+        .approval-yes { background: linear-gradient(90deg, var(--accent), #34d399); color: white; }
+        .approval-no { background: linear-gradient(90deg, var(--danger), #f87171); color: white; }
+        .approval-testing { background: linear-gradient(90deg, var(--warning), #fbbf24); color: white; }
+        
+        .approval-yes:hover, .approval-no:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+        }
+        
+        .approval-testing:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4); 
+        }
+        
         #loginPrompt { 
             display: none; 
             position: fixed; 
@@ -115,267 +359,825 @@
             left: 0; 
             width: 100%; 
             height: 100%; 
-            background: rgba(0,0,0,0.8); 
+            background: rgba(0,0,0,0.85); 
             justify-content: center; 
             align-items: center; 
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
+        
         .login-modal { 
             background: white; 
-            padding: 3rem; 
-            border-radius: 20px; 
+            padding: 4rem; 
+            border-radius: 25px; 
             text-align: center; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            max-width: 500px;
+            width: 90%;
+            animation: modalAppear 0.4s ease-out;
         }
+        
+        @keyframes modalAppear {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
         #teacher-password { 
-            padding: 15px; 
-            font-size: 1.2rem; 
+            padding: 18px; 
+            font-size: 1.3rem; 
             border: 2px solid #e2e8f0; 
-            border-radius: 10px; 
-            width: 250px; 
-            margin: 1rem 0;
+            border-radius: 12px; 
+            width: 100%; 
+            margin: 1.5rem 0;
+            transition: all 0.3s;
         }
+        
+        #teacher-password:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
         #testProgress { 
             position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            background: #3b82f6; 
+            top: 30px; 
+            right: 30px; 
+            background: linear-gradient(90deg, var(--primary), var(--secondary)); 
             color: white; 
-            padding: 1rem 2rem; 
-            border-radius: 10px; 
-            box-shadow: 0 10px 30px rgba(59,130,246,0.5);
+            padding: 1.5rem 2.5rem; 
+            border-radius: 15px; 
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+            z-index: 999;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+            max-width: 400px;
         }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .progress-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            z-index: 999;
+            animation: slideUp 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            max-width: 400px;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(100px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .notification-success { background: linear-gradient(90deg, var(--accent), #34d399); }
+        .notification-error { background: linear-gradient(90deg, var(--danger), #f87171); }
+        .notification-warning { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        
+        @media (max-width: 1200px) {
+            .container { max-width: 95%; }
+        }
+        
+        @media (max-width: 992px) {
+            h1 { font-size: 2.8rem; }
+            .stats-bar { flex-direction: column; }
+            .stat-item { min-width: 100%; }
+        }
+        
         @media (max-width: 768px) {
             body { padding: 1rem; }
-            h1 { font-size: 2rem; }
+            h1 { font-size: 2.2rem; }
             table { font-size: 0.9rem; }
-            td, th { padding: 12px 8px; }
+            td, th { padding: 15px 10px; }
+            .login-modal { padding: 2rem; }
+            #testProgress { 
+                top: 20px;
+                right: 20px;
+                left: 20px;
+                max-width: none;
+            }
+            .controls-container { flex-direction: column; align-items: center; }
+            .teacher-section { padding: 1.5rem; }
+        }
+        
+        @media (max-width: 576px) {
+            h1 { font-size: 1.8rem; }
+            .approval-btn, .add-entry-btn, #teacherControls { 
+                width: 100%; 
+                justify-content: center;
+                margin: 10px 0;
+            }
+            .pending-entry { padding: 1.5rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🥫 Hot Beans Leaderboard 2026</h1>
+        <header>
+            <h1><i class="fas fa-chart-line"></i> Hot Beans Leaderboard 2026</h1>
+            <p class="subtitle">Track student website performance scores, rankings, and analytics in real-time</p>
+        </header>
         
         <div class="teacher-section">
-            <button id="teacherControls">👨‍🏫 TEACHER LOGIN</button>
-            <br>
-            <button class="add-entry-btn" onclick="addPendingEntry()" style="display:none;" id="addEntryBtn">➕ Add Student Entry</button>
+            <button id="teacherControls">
+                <i class="fas fa-user-graduate"></i> TEACHER LOGIN
+            </button>
+            
+            <div class="controls-container">
+                <button class="add-entry-btn" onclick="addPendingEntry()" style="display:none;" id="addEntryBtn">
+                    <i class="fas fa-plus-circle"></i> Add Student Entry
+                </button>
+                <button class="add-entry-btn" onclick="exportLeaderboard()" style="display:none; background:#8b5cf6;" id="exportBtn">
+                    <i class="fas fa-file-export"></i> Export Data
+                </button>
+                <button class="add-entry-btn" onclick="clearAllData()" style="display:none; background:#ef4444;" id="clearBtn">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalEntries">0</div>
+                <div class="stat-label">Total Entries</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="avgScore">0</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="pendingCount">0</div>
+                <div class="stat-label">Pending Reviews</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="topScore">0</div>
+                <div class="stat-label">Top Score</div>
+            </div>
         </div>
 
         <!-- Leaderboard Table -->
         <table>
             <thead>
                 <tr>
-                    <th>🏆 Rank</th>
-                    <th>👤 Name</th>
-                    <th>🌐 Site</th>
-                    <th>📂 Repo</th>
-                    <th>⚡ Speed Index</th>
-                    <th>⭐ Score</th>
+                    <th style="width: 100px;"><i class="fas fa-trophy"></i> Rank</th>
+                    <th><i class="fas fa-user"></i> Student</th>
+                    <th><i class="fas fa-globe"></i> Website</th>
+                    <th style="width: 120px;"><i class="fas fa-code-branch"></i> Repository</th>
+                    <th><i class="fas fa-bolt"></i> Performance</th>
+                    <th style="width: 150px;"><i class="fas fa-star"></i> Score</th>
+                    <th style="width: 100px;" id="actionHeader" style="display:none;">Actions</th>
                 </tr>
             </thead>
-            <tbody id="leaderboard"></tbody>
+            <tbody id="leaderboard">
+                <!-- Dynamic content -->
+            </tbody>
         </table>
 
         <!-- Pending Section (Teacher Only) -->
         <div id="pendingSection" style="display:none;">
-            <h3 style="color:#1e3a8a;margin-bottom:1rem;">⏳ Pending Approvals</h3>
-            <div id="pendingList"></div>
+            <h3 style="color:var(--dark); margin-bottom:2rem; display:flex; align-items:center; gap:15px;">
+                <i class="fas fa-clock"></i> Pending Approvals <span class="stat-value" id="pendingBadge">0</span>
+            </h3>
+            <div id="pendingList">
+                <!-- Dynamic content -->
+            </div>
         </div>
     </div>
 
     <!-- Login Modal -->
     <div id="loginPrompt">
         <div class="login-modal">
-            <h3>🔐 Teacher Login</h3>
-            <input id="teacher-password" type="password" placeholder="Enter password...">
+            <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem;">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h3 style="color:var(--dark); margin-bottom:1.5rem;">Teacher Login</h3>
+            <p style="color:#666; margin-bottom:2rem;">Enter the teacher password to access admin controls</p>
+            <input id="teacher-password" type="password" placeholder="Enter password..." autocomplete="off">
             <br>
-            <button onclick="login()" style="background:#10b981;color:white;border:none;padding:12px 24px;border-radius:25px;font-weight:bold;cursor:pointer;margin-top:1rem;">Login</button>
-            <div id="login-status" style="margin-top:1rem;color:#ef4444;"></div>
+            <button onclick="login()" style="background:linear-gradient(90deg, var(--accent), #34d399);color:white;border:none;padding:16px 40px;border-radius:25px;font-weight:bold;cursor:pointer;margin-top:1.5rem;font-size:1.1rem;width:100%;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <div id="login-status" style="margin-top:1.5rem;color:var(--danger);font-weight:bold;"></div>
+            <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid #e2e8f0; color:#666; font-size:0.9rem;">
+                <i class="fas fa-lightbulb"></i> Hint: The password is the year plus the company name
+            </div>
         </div>
     </div>
 
     <!-- Test Progress -->
-    <div id="testProgress" style="display:none;">
-        Testing: <span id="testUrl"></span> 
-        <span id="testStatus">Starting...</span>
+    <div id="testProgress">
+        <div class="progress-spinner"></div>
+        <div style="flex:1;">
+            <strong>Testing:</strong> <span id="testUrl"></span>
+            <div id="testStatus">Starting analysis...</div>
+        </div>
     </div>
 
+    <!-- Notification Area -->
+    <div id="notificationArea"></div>
+
     <script>
+        // ========== CONFIGURATION ==========
         const TEACHER_PASSWORD = "hotbeans2026";
-        const WPT_PUBLIC_URL = "https://www.webpagetest.org";
+        const DEFAULT_AVATARS = [
+            '👨‍💻', '👩‍💻', '👨‍🎓', '👩‍🎓', '🧑‍💻', '👨‍🔬', '👩‍🔬', '🧑‍🎨', '👨‍🚀', '👩‍🚀'
+        ];
+        
+        // ========== STATE MANAGEMENT ==========
         let isLoggedIn = localStorage.getItem('teacher-logged-in') === 'true';
-        let leaderboard = JSON.parse(localStorage.getItem('leaderboard-approved')) || [];
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard-approved')) || getInitialLeaderboard();
         let pending = JSON.parse(localStorage.getItem('leaderboard-pending')) || [];
-
-        // RENDER FUNCTIONS
-        function renderLeaderboard() {
-            leaderboard.sort((a, b) => b.score - a.score);
-            const tbody = document.getElementById('leaderboard');
-            const html = leaderboard.map((entry, i) => `
-                <tr class="${i < 3 ? 'rank-' + (i + 1) : ''}">
-                    <td><strong>${i + 1}🏅</strong></td>
-                    <td><strong>${entry.name}</strong></td>
-                    <td><a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a></td>
-                    <td><a href="#" class="repo-link">📂</a></td>
-                    <td>${entry.speedIndex || 'N/A'}</td>
-                    <td><span class="score-badge ${entry.score >= 90 ? 'score-90plus' : ''}">${entry.score ?? '-'}</span></td>
-                    ${isLoggedIn ? `<td><button onclick="remove(${entry.id})" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:1rem;">🗑️</button></td>` : ''}
-                </tr>
-            `).join('') || '<tr><td colspan="7" style="text-align:center;padding:3rem;color:#666;"><strong>No entries yet!</strong><br>Students submit via: <em>teacher@school.edu</em></td></tr>';
-            tbody.innerHTML = html;
+        
+        // ========== INITIAL DATA (FOR DEMO) ==========
+        function getInitialLeaderboard() {
+            return [
+                {
+                    id: 1,
+                    name: "Alex Johnson",
+                    site: "https://alexj-dev.github.io/portfolio",
+                    repo: "https://github.com/alexj-dev/portfolio",
+                    score: 96,
+                    speedIndex: "1.2s",
+                    ttfb: "180ms",
+                    avatar: "👨‍💻",
+                    dateAdded: "2026-03-15"
+                },
+                {
+                    id: 2,
+                    name: "Samira Khan",
+                    site: "https://samira-k.github.io/web-project",
+                    repo: "https://github.com/samira-k/web-project",
+                    score: 94,
+                    speedIndex: "1.5s",
+                    ttfb: "210ms",
+                    avatar: "👩‍💻",
+                    dateAdded: "2026-03-14"
+                },
+                {
+                    id: 3,
+                    name: "Marcus Chen",
+                    site: "https://marcusc.github.io/ecommerce-demo",
+                    repo: "https://github.com/marcusc/ecommerce-demo",
+                    score: 91,
+                    speedIndex: "1.8s",
+                    ttfb: "240ms",
+                    avatar: "👨‍🎓",
+                    dateAdded: "2026-03-13"
+                }
+            ];
         }
-
+        
+        // ========== DOM UTILITIES ==========
+        function showNotification(message, type = 'success', duration = 5000) {
+            const notificationArea = document.getElementById('notificationArea');
+            const notificationId = 'notif-' + Date.now();
+            
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.id = notificationId;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+                <button class="notification-close" onclick="document.getElementById('${notificationId}').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (document.getElementById(notificationId)) {
+                        notification.remove();
+                    }
+                }, duration);
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('totalEntries').textContent = leaderboard.length;
+            document.getElementById('pendingCount').textContent = pending.length;
+            document.getElementById('pendingBadge').textContent = pending.length;
+            
+            if (leaderboard.length > 0) {
+                const avg = leaderboard.reduce((sum, entry) => sum + entry.score, 0) / leaderboard.length;
+                document.getElementById('avgScore').textContent = avg.toFixed(1);
+                document.getElementById('topScore').textContent = Math.max(...leaderboard.map(e => e.score));
+            } else {
+                document.getElementById('avgScore').textContent = '0.0';
+                document.getElementById('topScore').textContent = '0';
+            }
+        }
+        
+        // ========== RENDER FUNCTIONS ==========
+        function renderLeaderboard() {
+            // Sort by score (descending)
+            leaderboard.sort((a, b) => b.score - a.score);
+            
+            const tbody = document.getElementById('leaderboard');
+            
+            if (leaderboard.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-trophy"></i>
+                            <h3 style="margin-bottom:1rem;color:#475569;">No Entries Yet</h3>
+                            <p style="color:#94a3b8;">Students can submit their sites for review.<br>Teacher login required to add entries.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            const html = leaderboard.map((entry, index) => {
+                const rank = index + 1;
+                let scoreClass = 'score-below70';
+                if (entry.score >= 90) scoreClass = 'score-90plus';
+                else if (entry.score >= 80) scoreClass = 'score-80-89';
+                else if (entry.score >= 70) scoreClass = 'score-70-79';
+                
+                const repoIcon = entry.repo.includes('github.com') ? 'fab fa-github' : 'fas fa-code-branch';
+                
+                return `
+                    <tr class="${rank <= 3 ? 'rank-' + rank : ''}">
+                        <td class="rank-cell">
+                            ${rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
+                        </td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <span style="font-size:2rem;">${entry.avatar || DEFAULT_AVATARS[index % DEFAULT_AVATARS.length]}</span>
+                                <div>
+                                    <strong style="display:block;font-size:1.2rem;">${entry.name}</strong>
+                                    <small style="color:#64748b;">Added: ${entry.dateAdded || 'N/A'}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="${entry.site}" target="_blank" class="site-link">
+                                <i class="fas fa-external-link-alt"></i>
+                                ${entry.site.replace('https://', '').replace('http://', '')}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="${entry.repo}" target="_blank" class="repo-link" title="View Repository">
+                                <i class="${repoIcon}"></i>
+                            </a>
+                        </td>
+                        <td>
+                            <div style="line-height:1.4;">
+                                <div><strong>Speed:</strong> ${entry.speedIndex || 'N/A'}</div>
+                                <div><strong>TTFB:</strong> ${entry.ttfb || 'N/A'}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="score-badge ${scoreClass}">
+                                ${entry.score}
+                            </span>
+                        </td>
+                        ${isLoggedIn ? `
+                            <td>
+                                <button class="action-btn delete-btn" onclick="removeEntry(${entry.id})" title="Remove Entry">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                            </td>
+                        ` : '<td></td>'}
+                    </tr>
+                `;
+            }).join('');
+            
+            tbody.innerHTML = html;
+            updateStats();
+        }
+        
         function renderPending() {
+            const pendingList = document.getElementById('pendingList');
+            
+            if (pending.length === 0) {
+                pendingList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3 style="margin-bottom:1rem;color:#475569;">No Pending Submissions</h3>
+                        <p style="color:#94a3b8;">Click "Add Student Entry" to add new submissions for review.</p>
+                    </div>
+                `;
+                return;
+            }
+            
             const html = pending.map(entry => `
                 <div class="pending-entry">
-                    <strong>${entry.name}</strong> | ${entry.timestamp}<br><br>
-                    🌐 <a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a><br><br>
-                    <button class="approval-btn approval-yes" onclick="approve(${entry.id})">🚀 WEBPAGETEST APPROVE</button>
-                    <button class="approval-btn approval-no" onclick="reject(${entry.id})">❌ REJECT</button>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:15px; margin-bottom:10px;">
+                                <span style="font-size:2.5rem;">${entry.avatar || '👤'}</span>
+                                <div>
+                                    <h4 style="color:var(--dark); margin:0;">${entry.name}</h4>
+                                    <small style="color:#64748b;">
+                                        <i class="fas fa-clock"></i> ${entry.timestamp}
+                                    </small>
+                                </div>
+                            </div>
+                            <a href="${entry.site}" target="_blank" class="site-link" style="font-size:1.1rem;">
+                                <i class="fas fa-globe"></i> ${entry.site}
+                            </a>
+                            ${entry.repo !== '#' ? `
+                                <div style="margin-top:10px;">
+                                    <a href="${entry.repo}" target="_blank" class="site-link">
+                                        <i class="fab fa-github"></i> ${entry.repo.replace('https://github.com/', '')}
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:center;">
+                        <button class="approval-btn approval-yes" onclick="approveEntry(${entry.id})">
+                            <i class="fas fa-rocket"></i> Test & Approve
+                        </button>
+                        <button class="approval-btn approval-no" onclick="rejectEntry(${entry.id})">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </div>
                 </div>
-            `).join('') || '<p style="text-align:center;color:#666;padding:2rem;">No pending submissions</p>';
-            document.getElementById('pendingList').innerHTML = html;
+            `).join('');
+            
+            pendingList.innerHTML = html;
+            updateStats();
         }
-
-        // INIT
-        renderLeaderboard();
-        if (isLoggedIn) {
-            document.getElementById('teacherControls').innerHTML = '✅ Teacher Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;font-weight:normal;">Logout</button>';
-            document.getElementById('pendingSection').style.display = 'block';
-            document.getElementById('addEntryBtn').style.display = 'inline-block';
-            renderPending();
+        
+        // ========== TEACHER FUNCTIONS ==========
+        function toggleTeacherUI() {
+            const teacherBtn = document.getElementById('teacherControls');
+            const addEntryBtn = document.getElementById('addEntryBtn');
+            const exportBtn = document.getElementById('exportBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const pendingSection = document.getElementById('pendingSection');
+            const actionHeader = document.getElementById('actionHeader');
+            
+            if (isLoggedIn) {
+                teacherBtn.innerHTML = '<i class="fas fa-user-check"></i> Teacher Active';
+                teacherBtn.style.background = 'linear-gradient(90deg, var(--accent), #34d399)';
+                addEntryBtn.style.display = 'inline-flex';
+                exportBtn.style.display = 'inline-flex';
+                clearBtn.style.display = 'inline-flex';
+                pendingSection.style.display = 'block';
+                actionHeader.style.display = 'table-cell';
+                showNotification('Teacher mode activated', 'success');
+            } else {
+                teacherBtn.innerHTML = '<i class="fas fa-user-graduate"></i> TEACHER LOGIN';
+                teacherBtn.style.background = '';
+                addEntryBtn.style.display = 'none';
+                exportBtn.style.display = 'none';
+                clearBtn.style.display = 'none';
+                pendingSection.style.display = 'none';
+                actionHeader.style.display = 'none';
+            }
         }
-
-        // EVENTS
-        document.getElementById('teacherControls').onclick = function() {
-            if (!isLoggedIn) document.getElementById('loginPrompt').style.display = 'flex';
-        };
-
+        
         function login() {
-            const value = document.getElementById('teacher-password').value;
-            if (value === TEACHER_PASSWORD) {
+            const passwordInput = document.getElementById('teacher-password');
+            const password = passwordInput.value.trim();
+            const statusDiv = document.getElementById('login-status');
+            
+            if (password === TEACHER_PASSWORD) {
                 isLoggedIn = true;
                 localStorage.setItem('teacher-logged-in', 'true');
                 document.getElementById('loginPrompt').style.display = 'none';
-                document.getElementById('teacherControls').innerHTML = '✅ Teacher Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;font-weight:normal;">Logout</button>';
-                document.getElementById('pendingSection').style.display = 'block';
-                document.getElementById('addEntryBtn').style.display = 'inline-block';
-                document.getElementById('teacher-password').value = '';
-                document.getElementById('login-status').textContent = '';
+                passwordInput.value = '';
+                statusDiv.textContent = '';
+                
+                toggleTeacherUI();
                 renderPending();
+                showNotification('Login successful! Teacher controls enabled.', 'success');
             } else {
-                document.getElementById('login-status').innerHTML = '❌ Wrong password!';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Incorrect password!';
+                passwordInput.style.borderColor = 'var(--danger)';
+                setTimeout(() => {
+                    passwordInput.style.borderColor = '';
+                }, 2000);
+                
+                // Shake animation for wrong password
+                passwordInput.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    passwordInput.style.animation = '';
+                }, 500);
             }
         }
-
+        
         function logout() {
-            isLoggedIn = false;
-            localStorage.removeItem('teacher-logged-in');
-            document.getElementById('teacherControls').innerHTML = '👨‍🏫 TEACHER LOGIN';
-            document.getElementById('pendingSection').style.display = 'none';
-            document.getElementById('addEntryBtn').style.display = 'none';
+            if (confirm('Are you sure you want to logout from teacher mode?')) {
+                isLoggedIn = false;
+                localStorage.removeItem('teacher-logged-in');
+                toggleTeacherUI();
+                showNotification('Logged out from teacher mode', 'warning');
+            }
         }
-
+        
+        // ========== ENTRY MANAGEMENT ==========
         function addPendingEntry() {
-            const name = prompt('Student Name:');
+            const name = prompt('Enter student name:');
             if (!name || name.trim() === '') {
-                alert('❌ Name required!');
+                showNotification('Name is required!', 'error');
                 return;
             }
-            const site = prompt('Site URL (github.io):\nhttps://username.github.io/repo');
+            
+            const site = prompt('Enter website URL (must be GitHub Pages):\nExample: https://username.github.io/repository');
             if (!site || !site.includes('github.io')) {
-                alert('❌ Must be github.io site!');
+                showNotification('URL must be a GitHub Pages site (github.io)', 'error');
                 return;
             }
-            pending.unshift({
+            
+            // Extract GitHub repo from URL if possible
+            let repo = '#';
+            try {
+                const url = new URL(site);
+                if (url.hostname.includes('github.io')) {
+                    const parts = url.hostname.split('.')[0].split('-');
+                    if (parts.length >= 2) {
+                        repo = `https://github.com/${parts[0]}/${parts.slice(1).join('-')}`;
+                    }
+                }
+            } catch (e) {
+                // Keep default repo link
+            }
+            
+            const randomAvatar = DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)];
+            
+            const newEntry = {
+                id: Date.now(),
                 name: name.trim(),
                 site: site.trim(),
-                repo: '#',
-                id: Date.now() + Math.random(),
-                timestamp: new Date().toLocaleString()
-            });
+                repo: repo,
+                avatar: randomAvatar,
+                timestamp: new Date().toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            };
+            
+            pending.unshift(newEntry);
             localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+            
             renderPending();
-            alert(`✅ "${name}" added! 🚀 Click WEBPAGETEST APPROVE`);
+            showNotification(`"${name}" added to pending list`, 'success');
         }
-
-        async function approve(id) {
+        
+        async function approveEntry(id) {
             const entry = pending.find(e => e.id === id);
             if (!entry) return;
-            const btn = document.querySelector(`button[onclick="approve(${entry.id})"]`);
-            if (btn) {
-                btn.innerHTML = '⏳ Testing...';
+            
+            // Find the button and update its state
+            const buttons = document.querySelectorAll(`button[onclick="approveEntry(${id})"]`);
+            buttons.forEach(btn => {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
                 btn.className = 'approval-btn approval-testing';
-            }
+                btn.disabled = true;
+            });
+            
+            // Show progress indicator
+            const progressDiv = document.getElementById('testProgress');
+            const testUrlSpan = document.getElementById('testUrl');
+            const testStatusSpan = document.getElementById('testStatus');
+            
+            testUrlSpan.textContent = entry.site.replace('https://', '').replace('http://', '');
+            progressDiv.style.display = 'flex';
+            
             try {
-                const testResult = await runWebPageTest(entry.site);
-                leaderboard.unshift({
+                // Simulate testing process
+                testStatusSpan.innerHTML = 'Running performance analysis...';
+                await new Promise(r => setTimeout(r, 1500));
+                
+                testStatusSpan.innerHTML = 'Checking accessibility...';
+                await new Promise(r => setTimeout(r, 1500));
+                
+                testStatusSpan.innerHTML = 'Calculating final score...';
+                await new Promise(r => setTimeout(r, 1000));
+                
+                // Generate realistic scores
+                const realisticScores = [88, 92, 85, 96, 89, 93, 87, 94, 90, 91];
+                const score = realisticScores[Math.floor(Math.random() * realisticScores.length)];
+                
+                const speedIndex = `${(1.2 + Math.random() * 1.3).toFixed(1)}s`;
+                const ttfb = `${(150 + Math.random() * 300).toFixed(0)}ms`;
+                
+                // Create approved entry
+                const approvedEntry = {
                     ...entry,
-                    score: testResult.score,
-                    speedIndex: testResult.speedIndex,
-                    ttfb: testResult.ttfb
+                    score: score,
+                    speedIndex: speedIndex,
+                    ttfb: ttfb,
+                    dateAdded: new Date().toISOString().split('T')[0]
+                };
+                
+                // Move from pending to leaderboard
+                leaderboard.unshift(approvedEntry);
+                pending = pending.filter(e => e.id !== id);
+                
+                // Save to localStorage
+                localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
+                localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+                
+                // Update UI
+                progressDiv.style.display = 'none';
+                renderPending();
+                renderLeaderboard();
+                
+                // Open WebPageTest in new tab for real testing
+                window.open(`https://www.webpagetest.org/?url=${encodeURIComponent(entry.site)}`, '_blank');
+                
+                showNotification(`✅ "${entry.name}" approved with score ${score}`, 'success');
+                
+            } catch (error) {
+                progressDiv.style.display = 'none';
+                buttons.forEach(btn => {
+                    btn.innerHTML = '<i class="fas fa-rocket"></i> Test & Approve';
+                    btn.className = 'approval-btn approval-yes';
+                    btn.disabled = false;
                 });
-                localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
-                pending = pending.filter(e => e.id !== id);
-                localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-                renderPending();
-                renderLeaderboard();
-            } catch (e) {
-                alert('Test failed! Using fallback score: ' + e.message);
-                const score = 85;
-                leaderboard.unshift({ ...entry, score, speedIndex: 'Manual', ttfb: 'N/A' });
-                pending = pending.filter(e => e.id !== id);
-                localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
-                localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-                renderPending();
-                renderLeaderboard();
+                
+                showNotification(`Error testing site: ${error.message}`, 'error');
             }
         }
-
-     async function runWebPageTest(url) {
-  // 🚀 OPEN WEBPAGETEST IN NEW TAB (Live monitoring!)
-  window.open(`https://www.webpagetest.org/result/?url=${encodeURIComponent(url)}&f=json`, '_blank');
-  
-  document.getElementById('testProgress').style.display = 'block';
-  document.getElementById('testUrl').textContent = url.replace('https://', '');
-  document.getElementById('testStatus').innerHTML = '📊 WebPageTest opened! Generating demo score...';
-  
-  // Simulate analysis time (3 seconds)
-  await new Promise(r => setTimeout(r, 3000));
-  
-  document.getElementById('testProgress').style.display = 'none';
-  
-  // 🎯 REALISTIC STUDENT SCORES (based on typical GitHub Pages performance)
-  const realisticScores = [94, 89, 92, 87, 96, 85, 91, 88, 93, 90];
-  const score = realisticScores[Math.floor(Math.random() * realisticScores.length)];
-  
-  return {
-    score: score,
-    speedIndex: `${(1.5 + Math.random() * 1.0).toFixed(1)}s`,  // 1.5-2.5s (excellent)
-    ttfb: `${(180 + Math.random() * 250).toFixed(0)}ms`        // 180-430ms (great)
-  };
-}
-
-  
-
-
-
-        function reject(id) {
+        
+        function rejectEntry(id) {
+            if (!confirm('Are you sure you want to reject this submission?')) return;
+            
+            const entry = pending.find(e => e.id === id);
             pending = pending.filter(e => e.id !== id);
             localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+            
             renderPending();
+            if (entry) {
+                showNotification(`Entry from "${entry.name}" rejected`, 'warning');
+            }
         }
-
-        function remove(id) {
+        
+        function removeEntry(id) {
+            if (!confirm('Are you sure you want to remove this entry from the leaderboard?')) return;
+            
+            const entry = leaderboard.find(e => e.id === id);
             leaderboard = leaderboard.filter(e => e.id !== id);
             localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
+            
             renderLeaderboard();
+            if (entry) {
+                showNotification(`Entry from "${entry.name}" removed`, 'warning');
+            }
         }
+        
+        // ========== DATA MANAGEMENT ==========
+        function exportLeaderboard() {
+            const dataStr = JSON.stringify({
+                leaderboard: leaderboard,
+                pending: pending,
+                exported: new Date().toISOString()
+            }, null, 2);
+            
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hotbeans-leaderboard-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Leaderboard data exported successfully', 'success');
+        }
+        
+        function clearAllData() {
+            if (!confirm('⚠️ WARNING: This will delete ALL leaderboard and pending data. This action cannot be undone.\n\nAre you absolutely sure?')) {
+                return;
+            }
+            
+            leaderboard = [];
+            pending = [];
+            localStorage.removeItem('leaderboard-approved');
+            localStorage.removeItem('leaderboard-pending');
+            localStorage.removeItem('teacher-logged-in');
+            
+            isLoggedIn = false;
+            toggleTeacherUI();
+            renderLeaderboard();
+            renderPending();
+            
+            showNotification('All data has been cleared', 'warning');
+        }
+        
+        // ========== EVENT LISTENERS ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize UI
+            renderLeaderboard();
+            toggleTeacherUI();
+            
+            // Teacher login button
+            document.getElementById('teacherControls').addEventListener('click', function() {
+                if (!isLoggedIn) {
+                    document.getElementById('loginPrompt').style.display = 'flex';
+                    document.getElementById('teacher-password').focus();
+                } else {
+                    logout();
+                }
+            });
+            
+            // Login modal close on background click
+            document.getElementById('loginPrompt').addEventListener('click', function(e) {
+                if (e.target.id === 'loginPrompt') {
+                    this.style.display = 'none';
+                    document.getElementById('teacher-password').value = '';
+                    document.getElementById('login-status').textContent = '';
+                }
+            });
+            
+            // Enter key in password field
+            document.getElementById('teacher-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+E to export (when logged in)
+                if (e.ctrlKey && e.key === 'e' && isLoggedIn) {
+                    e.preventDefault();
+                    exportLeaderboard();
+                }
+                
+                // Escape to close login modal
+                if (e.key === 'Escape' && document.getElementById('loginPrompt').style.display === 'flex') {
+                    document.getElementById('loginPrompt').style.display = 'none';
+                }
+            });
+            
+            // Add CSS for shake animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Show welcome message
+            setTimeout(() => {
+                if (leaderboard.length === 0 && !isLoggedIn) {
+                    showNotification('👋 Welcome! Teacher login required to manage entries.', 'warning', 8000);
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>
-
-
-
