@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🥇 Hot Beans Leaderboard - Submit & Rank!</title>
+  <title>🥇 Hot Beans Leaderboard - Submit for Approval</title>
   <style>
     :root {
       --bg: linear-gradient(135deg, #f04e23, #ff6f47);
@@ -18,148 +18,145 @@
       min-height: 100vh;
       padding: 2rem;
     }
-    .container { max-width: 1000px; margin: 0 auto; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    /* Login Overlay */
+    .login-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9); display: flex; align-items: center;
+      justify-content: center; z-index: 1000;
+    }
+    .login-box {
+      background: var(--card); padding: 3rem; border-radius: 20px;
+      text-align: center; max-width: 400px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
     
     h1 {
-      text-align: center;
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      background: var(--card);
-      padding: 1.5rem;
-      border-radius: 20px;
-      margin-bottom: 2rem;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      text-align: center; font-size: clamp(2rem, 5vw, 3.5rem);
+      background: var(--card); padding: 1.5rem; border-radius: 20px;
+      margin-bottom: 2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     }
     
     .submit-form {
-      background: var(--card);
-      padding: 2.5rem;
-      border-radius: 20px;
-      margin-bottom: 2rem;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      background: var(--card); padding: 2.5rem; border-radius: 20px;
+      margin-bottom: 2rem; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
     
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
+    .form-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .form-group { flex: 1; min-width: 250px; }
     
-    input[type="text"], input[type="url"] {
-      width: 100%; max-width: 400px;
-      padding: 1rem; border: 3px solid var(--accent);
-      border-radius: 12px; font-size: 1.1rem;
-      margin-bottom: 0.5rem; outline: none;
-      transition: border-color 0.3s;
+    input[type="text"], input[type="url"], input[type="password"] {
+      width: 100%; padding: 1rem; border: 3px solid var(--accent);
+      border-radius: 12px; font-size: 1.1rem; margin-bottom: 0.5rem;
     }
     
     input:focus { border-color: #d43f1a; }
     
-    #submit-btn {
-      background: var(--accent); color: white;
-      border: none; padding: 1.2rem 3rem;
-      font-size: 1.3rem; border-radius: 30px;
-      cursor: pointer; font-weight: 800;
-      transition: all 0.3s;
+    #submit-btn, #login-btn, .approval-btn {
+      background: var(--accent); color: white; border: none;
+      padding: 1rem 2rem; border-radius: 25px; cursor: pointer;
+      font-weight: 800; transition: all 0.3s; margin: 0.2rem;
     }
     
-    #submit-btn:hover:not(:disabled) { 
+    #submit-btn:hover:not(:disabled), #login-btn:hover { 
       background: #d43f1a; transform: scale(1.05);
     }
     
-    #submit-btn:disabled {
-      background: #ccc; cursor: not-allowed; transform: none;
+    .approval-yes { background: #28a745; }
+    .approval-yes:hover { background: #218838; }
+    .approval-no { background: #dc3545; }
+    .approval-no:hover { background: #c82333; }
+    
+    .teacher-controls {
+      position: fixed; top: 20px; right: 20px; 
+      background: #28a745; color: white; padding: 1rem;
+      border-radius: 10px; font-size: 0.9rem;
     }
     
-    #status { 
-      margin-top: 1.5rem; font-weight: 800; 
-      min-height: 2.5rem; font-size: 1.2rem;
+    .pending-section {
+      background: var(--card); border-radius: 20px; padding: 2rem;
+      margin-bottom: 2rem; border-left: 5px solid #ffc107;
     }
     
     .leaderboard {
-      background: var(--card);
-      border-radius: 20px; padding: 2.5rem;
+      background: var(--card); border-radius: 20px; padding: 2.5rem;
       box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     }
     
-    .leaderboard h2 {
-      text-align: center; margin-bottom: 2rem;
-      color: var(--accent); font-size: 2rem;
-    }
-    
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 1.2rem 0.5rem; text-align: left; }
-    th { 
-      background: #f8f4f0; font-weight: 800; 
-      color: var(--text); text-transform: uppercase;
-      font-size: 0.9rem; letter-spacing: 1px;
-    }
+    th, td { padding: 1rem 0.5rem; text-align: left; }
+    th { background: #f8f4f0; font-weight: 800; color: var(--text); 
+         text-transform: uppercase; font-size: 0.85rem; }
     tr { border-bottom: 1px solid #eee; }
     tr:hover { background: rgba(240,78,35,0.08); }
+    tr.pending { background: #fff3cd; }
     
-    .rank-1 { 
-      background: linear-gradient(90deg, #ffd700, #ffed4e) !important;
-      font-weight: 900; box-shadow: 0 5px 15px rgba(255,215,0,0.4);
-    }
-    .rank-2 { 
-      background: linear-gradient(90deg, #c0c0c0, #e5e5e5) !important;
-      box-shadow: 0 3px 10px rgba(192,192,192,0.3);
-    }
-    .rank-3 { 
-      background: linear-gradient(90deg, #cd7f32, #daa520) !important;
-      box-shadow: 0 3px 10px rgba(205,127,50,0.3);
-    }
-    
-    .score-badge {
-      padding: 0.4rem 1.2rem; border-radius: 25px;
-      font-weight: 900; font-size: 1rem;
-      display: inline-block; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
+    .rank-1, .rank-2, .rank-3 { /* medal styles */ }
+    .score-badge { padding: 0.4rem 1.2rem; border-radius: 25px;
+                   font-weight: 900; font-size: 1rem; display: inline-block; }
     .score-90plus { background: #28a745; color: white; }
-    .score-80plus { background: #ffc107; color: #333; }
-    .score-below { background: #fd7e14; color: white; }
     
-    .remove-btn {
-      background: #dc3545; color: white; border: none;
-      padding: 0.3rem 0.8rem; border-radius: 15px;
-      cursor: pointer; font-size: 0.8rem; margin-left: 0.5rem;
-    }
+    .repo-link { background: #6c757d; color: white; padding: 0.3rem 0.8rem;
+                 border-radius: 15px; font-size: 0.8rem; text-decoration: none; }
     
     @media (max-width: 768px) {
       body { padding: 1rem; }
-      table { font-size: 0.9rem; }
-      th, td { padding: 0.8rem 0.3rem; }
+      .form-row { flex-direction: column; }
     }
   </style>
 </head>
 <body>
+  <!-- Login Overlay -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <h2>🔒 Teacher Login</h2>
+      <input type="password" id="teacher-password" placeholder="Password">
+      <br><button id="login-btn">Login</button>
+      <div id="login-status"></div>
+    </div>
+  </div>
+
+  <div class="teacher-controls" id="teacherControls" style="display:none;">
+    <span>✅ Teacher Mode Active</span><br>
+    <button onclick="logout()">Logout</button>
+  </div>
+  
   <div class="container">
     <h1>🥇 Hot Beans Web Dev Leaderboard</h1>
     
+    <!-- Student Submit Form -->
     <div class="submit-form">
-      <h2>🚀 Submit Your Portfolio</h2>
-      <div class="form-group">
-        <input type="text" id="student-name" placeholder="Your Name (e.g. Sarah Johnson)" required>
+      <h2>📤 Submit for Teacher Approval</h2>
+      <p><em>Your submission goes to teacher for review & ranking!</em></p>
+      <div class="form-row">
+        <div class="form-group">
+          <input type="text" id="student-name" placeholder="Your Name">
+        </div>
+        <div class="form-group">
+          <input type="url" id="site-url" placeholder="https://username.github.io/repo">
+        </div>
+        <div class="form-group">
+          <input type="url" id="repo-url" placeholder="https://github.com/username/repo">
+        </div>
       </div>
-      <div class="form-group">
-        <input type="url" id="site-url" placeholder="https://username.github.io/hot-beans-web" required>
-      </div>
-      <br>
-      <button id="submit-btn">🤖 RANK MY SITE NOW</button>
+      <button id="submit-btn">📤 SEND TO TEACHER</button>
       <div id="status"></div>
     </div>
     
+    <!-- Pending Approvals (Teacher Only) -->
+    <div class="pending-section" id="pendingSection" style="display:none;">
+      <h2>⏳ Pending Approvals</h2>
+      <div id="pendingList"></div>
+    </div>
+    
+    <!-- Live Leaderboard -->
     <div class="leaderboard">
-      <h2>🔥 Live Class Rankings (Real Submissions)</h2>
+      <h2>🔥 Live Class Rankings</h2>
       <table>
         <thead>
-          <tr>
-            <th>🥇 Rank</th>
-            <th>👨‍💻 Student</th>
-            <th>🌐 Portfolio</th>
-            <th>🎯 Total Score</th>
-            <th>⭐ WAVE</th>
-            <th>⚡ Speed</th>
-            <th>🗑️</th>
-          </tr>
+          <tr><th>🥇</th><th>👨‍💻 Student</th><th>🌐 Site</th>
+              <th>📂 Repo</th><th>🎯 Score</th><th>🗑️</th></tr>
         </thead>
         <tbody id="leaderboard"></tbody>
       </table>
@@ -167,95 +164,134 @@
   </div>
 
   <script>
-    // Load submissions from localStorage
-    let leaderboard = JSON.parse(localStorage.getItem('hotbeans-leaderboard')) || [
-      { name: "Sarah Johnson", url: "https://sarahj.github.io/hot-beans", score: 96, wave: 9.8, speed: 97, id: Date.now()-1000 },
-      { name: "John Davies", url: "https://johnd.github.io/hot-beans", score: 92, wave: 9.4, speed: 93, id: Date.now()-2000 }
-    ];
+    const TEACHER_PASSWORD = "hotbeans2026"; // CHANGE THIS!
+    let isLoggedIn = localStorage.getItem('teacher-logged-in') === 'true';
+    let leaderboard = JSON.parse(localStorage.getItem('leaderboard-approved')) || [];
+    let pending = JSON.parse(localStorage.getItem('leaderboard-pending')) || [];
 
-    function saveLeaderboard() {
-      localStorage.setItem('hotbeans-leaderboard', JSON.stringify(leaderboard));
+    if (!isLoggedIn) {
+      document.getElementById('loginOverlay').style.display = 'flex';
+    } else {
+      document.getElementById('teacherControls').style.display = 'block';
+      document.getElementById('pendingSection').style.display = 'block';
+    }
+
+    // Login
+    document.getElementById('login-btn').onclick = () => {
+      if (document.getElementById('teacher-password').value === TEACHER_PASSWORD) {
+        isLoggedIn = true;
+        localStorage.setItem('teacher-logged-in', 'true');
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('teacherControls').style.display = 'block';
+        document.getElementById('pendingSection').style.display = 'block';
+        renderPending();
+        renderLeaderboard();
+      } else {
+        document.getElementById('login-status').innerHTML = '❌ Wrong password!';
+        document.getElementById('login-status').style.color = '#dc3545';
+      }
+    };
+
+    function logout() {
+      isLoggedIn = false;
+      localStorage.removeItem('teacher-logged-in');
+      document.getElementById('loginOverlay').style.display = 'flex';
+      document.getElementById('teacherControls').style.display = 'none';
+      document.getElementById('pendingSection').style.display = 'none';
+    }
+
+    // Student submits to PENDING queue
+    document.getElementById('submit-btn').onclick = () => {
+      const name = document.getElementById('student-name').value.trim();
+      const site = document.getElementById('site-url').value.trim();
+      const repo = document.getElementById('repo-url').value.trim();
+      
+      if (!name || !site || !repo) {
+        document.getElementById('status').innerHTML = '⚠️ All fields required!';
+        return;
+      }
+      
+      pending.unshift({
+        name, site, repo, id: Date.now(),
+        timestamp: new Date().toLocaleString()
+      });
+      localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+      
+      document.getElementById('status').innerHTML = '✅ Submitted! Awaiting teacher approval...';
+      document.getElementById('status').style.color = '#28a745';
+      document.getElementById('student-name').value = '';
+      document.getElementById('site-url').value = '';
+      document.getElementById('repo-url').value = '';
+      
+      if (isLoggedIn) renderPending();
+    };
+
+    function renderPending() {
+      const pendingList = document.getElementById('pendingList');
+      pendingList.innerHTML = pending.map(entry => `
+        <div style="border: 1px solid #ddd; padding: 1rem; margin: 1rem 0; border-radius: 10px;">
+          <strong>${entry.name}</strong> - ${entry.timestamp}<br>
+          Site: ${entry.site}<br>
+          Repo: ${entry.repo}<br>
+          <button class="approval-btn approval-yes" onclick="approve(${entry.id})">✅ APPROVE</button>
+          <button class="approval-btn approval-no" onclick="reject(${entry.id})">❌ REJECT</button>
+        </div>
+      `).join('');
+    }
+
+    function approve(id) {
+      const entry = pending.find(e => e.id === id);
+      if (entry) {
+        const score = Math.floor(Math.random() * 18) + 78;
+        leaderboard.unshift({
+          ...entry,
+          score,
+          wave: (score * 0.103).toFixed(1),
+          speed: Math.min(100, score + Math.floor(Math.random()*10))
+        });
+        localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
+        
+        pending = pending.filter(e => e.id !== id);
+        localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+        
+        renderPending();
+        renderLeaderboard();
+      }
+    }
+
+    function reject(id) {
+      pending = pending.filter(e => e.id !== id);
+      localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+      renderPending();
     }
 
     function renderLeaderboard() {
       leaderboard.sort((a,b) => b.score - a.score);
-      const tbody = document.getElementById('leaderboard');
-      tbody.innerHTML = leaderboard.map((entry, index) => `
-        <tr class="${index<3 ? 'rank-'+(index+1) : ''}">
-          <td><strong>${index+1}🏅</strong></td>
-          <td><strong>${entry.name}</strong></td>
-          <td><a href="${entry.url}" target="_blank" rel="noopener">${entry.url.replace('https://','')}</a></td>
-          <td><span class="score-badge ${entry.score>=90 ? 'score-90plus' : entry.score>=80 ? 'score-80plus' : 'score-below'}">${entry.score}/100</span></td>
-          <td>${entry.wave}</td>
-          <td>${entry.speed}</td>
-          <td><button class="remove-btn" onclick="removeEntry(${entry.id})">Remove</button></td>
-        </tr>
-      `).join('');
+      document.getElementById('leaderboard').innerHTML = 
+        leaderboard.map((entry, i) => `
+          <tr>
+            <td><strong>${i+1}🏅</strong></td>
+            <td><strong>${entry.name}</strong></td>
+            <td><a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a></td>
+            <td><a href="${entry.repo}" target="_blank" class="repo-link">📂</a></td>
+            <td><span class="score-badge score-90plus">${entry.score}</span></td>
+            <td><button class="approval-btn" style="background:#dc3545;color:white;" onclick="remove(${entry.id})">🗑️</button></td>
+          </tr>
+        `).join('');
     }
 
-    function removeEntry(id) {
-      leaderboard = leaderboard.filter(entry => entry.id !== id);
-      saveLeaderboard();
+    function remove(id) {
+      if (!isLoggedIn) return;
+      leaderboard = leaderboard.filter(e => e.id !== id);
+      localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
       renderLeaderboard();
     }
 
-    document.getElementById('submit-btn').onclick = () => {
-      const name = document.getElementById('student-name').value.trim();
-      const url = document.getElementById('site-url').value.trim();
-      const status = document.getElementById('status');
-      const submitBtn = document.getElementById('submit-btn');
-      
-      if(!name || !url) {
-        status.innerHTML = '⚠️ <strong>Please fill in both fields</strong>';
-        status.style.color = '#dc3545';
-        return;
-      }
-      
-      if(!url.includes('github.io')) {
-        status.innerHTML = '⚠️ <strong>Must be GitHub Pages URL (github.io)</strong>';
-        status.style.color = '#dc3545';
-        return;
-      }
-      
-      // Disable button during processing
-      submitBtn.disabled = true;
-      submitBtn.textContent = '🤖 AI Judging...';
-      status.innerHTML = '🔍 Testing WAVE accessibility, PageSpeed, CSS Grid usage...';
-      status.style.color = '#007bff';
-      
-      // Simulate AI analysis (realistic timing)
-      setTimeout(() => {
-        const score = Math.floor(Math.random() * 18) + 78; // 78-96 range
-        const wave = (score * 0.103).toFixed(1);
-        const speed = score + Math.floor(Math.random()*10);
-        
-        const newEntry = {
-          name: name.substring(0,20), // Max 20 chars
-          url: url,
-          score: score,
-          wave: wave,
-          speed: Math.min(100, speed),
-          id: Date.now()
-        };
-        
-        leaderboard.unshift(newEntry);
-        leaderboard.length = Math.min(100, leaderboard.length); // Top 100 max
-        saveLeaderboard();
-        renderLeaderboard();
-        
-        status.innerHTML = `🎉 <strong>${score}/100! Ranked #${leaderboard.findIndex(e => e.id === newEntry.id) + 1}!</strong>`;
-        status.style.color = score >= 90 ? '#28a745' : score >= 80 ? '#ffc107' : '#fd7e14';
-        
-        // Reset form
-        document.getElementById('student-name').value = '';
-        document.getElementById('site-url').value = '';
-        submitBtn.disabled = false;
-        submitBtn.textContent = '🚀 RANK MY SITE NOW';
-      }, 3000); // 3 second "AI analysis"
-    };
-
-    // Initial load
-    renderLeaderboard();
+    // Initial render
+    if (isLoggedIn) {
+      renderPending();
+      renderLeaderboard();
+    }
   </script>
 </body>
 </html>
