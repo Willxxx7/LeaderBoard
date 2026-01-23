@@ -180,19 +180,22 @@
       document.getElementById('pendingSection').style.display = 'none';
     }
 
-    async function addPendingEntry() {
-      const name = prompt('Student Name:');
-      const site = prompt('Site URL (must be github.io):');
-      const repo = prompt('Repo URL (must be github.com):');
-      
-      if (name && site?.includes('github.io') && repo?.includes('github.com')) {
-        pending.unshift({name, site, repo, id: Date.now(), timestamp: new Date().toLocaleString()});
-        localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-        renderPending();
-      } else {
-        alert('Invalid input! Need name + valid GitHub URLs.');
-      }
-    }
+   async function addPendingEntry() {
+  const name = prompt('Student Name:');
+  **if (!name) return;**  // ❌ CANCEL = STOP
+  const site = prompt('Site URL (must be github.io):');
+  **if (!site) return;**  // ❌ CANCEL = STOP  
+  const repo = prompt('Repo URL (must be github.com):');
+  
+  if (name && site?.includes('github.io') && repo?.includes('github.com')) {
+    pending.unshift({name, site, repo, id: Date.now(), timestamp: new Date().toLocaleString()});
+    localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+    renderPending();
+  } else {
+    alert('Invalid input! Need name + valid GitHub URLs.');
+  }
+}
+
 
     // 🔥 WEBPAGETEST AUTO-SCORING
     async function approve(id) {
@@ -326,3 +329,4 @@
   </script>
 </body>
 </html>
+
