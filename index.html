@@ -27,27 +27,21 @@
       box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     }
     
-    .submit-info {
-      background: var(--card); padding: 2.5rem; border-radius: 20px;
-      margin-bottom: 2rem; text-align: center; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      border-left: 5px solid #ffc107;
+    .submit-info, .leaderboard, .pending-section {
+      background: var(--card); border-radius: 20px; padding: 2.5rem;
+      margin-bottom: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     }
     
-    .leaderboard {
-      background: var(--card); border-radius: 20px; 
-      padding: 2.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-      border-left: 5px solid var(--accent);
-    }
+    .submit-info { border-left: 5px solid #ffc107; }
+    .leaderboard { border-left: 5px solid var(--accent); }
+    .pending-section { border-left: 5px solid #28a745; display: none; }
     
     .teacher-controls {
       position: fixed; top: 20px; right: 20px; 
       background: #28a745; color: white; padding: 1rem;
-      border-radius: 10px; cursor: pointer; z-index: 1000;
-      display: none;
+      border-radius: 10px; cursor: pointer; z-index: 100;
+      font-weight: bold;
     }
-    
-    .teacher-controls:hover { background: #218838; }
     
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 1rem 0.5rem; text-align: left; }
@@ -62,77 +56,76 @@
     .score-badge { padding: 0.4rem 1.2rem; border-radius: 25px; font-weight: 900; }
     .score-90plus { background: #28a745; color: white; }
     
-    .repo-link { background: #6c757d; color: white; padding: 0.3rem 0.8rem;
-                 border-radius: 15px; font-size: 0.8rem; text-decoration: none; }
-    
-    .pending-section { 
-      background: var(--card); border-radius: 20px; padding: 2rem;
-      margin-bottom: 2rem; border-left: 5px solid #ffc107;
-      display: none;
+    .repo-link { 
+      background: #6c757d; color: white; padding: 0.3rem 0.8rem;
+      border-radius: 15px; font-size: 0.8rem; text-decoration: none; 
     }
     
     .approval-btn {
       padding: 0.5rem 1rem; border: none; border-radius: 15px;
-      cursor: pointer; font-weight: 800; margin: 0.2rem;
+      cursor: pointer; font-weight: 800; margin: 0.2rem; font-size: 0.85rem;
     }
     .approval-yes { background: #28a745; color: white; }
     .approval-no { background: #dc3545; color: white; }
     
+    #loginPrompt {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9); display: none; z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    
     @media (max-width: 768px) {
       body { padding: 1rem; }
-      .teacher-controls { position: static; margin: 1rem auto; display: block; text-align: center; }
+      .teacher-controls { position: static; margin: 1rem auto; }
     }
   </style>
 </head>
 <body>
-  <!-- TEACHER CONTROLS - HIDDEN BY DEFAULT -->
+  <!-- SINGLE CLICK TEACHER BUTTON - NO OVERLAY ON LOAD -->
   <div class="teacher-controls" id="teacherControls">
-    ✅ Teacher Mode Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;">Logout</button>
+    👨‍🏫 TEACHER LOGIN
   </div>
   
-  <!-- MAIN PUBLIC CONTENT - ALWAYS VISIBLE -->
   <div class="container">
     <h1>🥇 Hot Beans Web Dev Leaderboard</h1>
     
     <!-- PUBLIC SUBMISSION INFO -->
     <div class="submit-info">
-      <h2>📧 Submit Your Portfolio</h2>
+      <h2>📧 Submit Your Work</h2>
       <p><strong>Email Mr. Will:</strong><br>
-      <code style="background:#f8f4f0;padding:0.5rem;border-radius:5px;">
+      <code style="background:#f8f4f0;padding:1rem;border-radius:10px;display:block;">
         "Sarah | https://sarah.github.io/hotbeans | https://github.com/sarah/hotbeans"
       </code></p>
-      <p><em>Teacher will add you to leaderboard after review!</em></p>
     </div>
     
-    <!-- TEACHER PENDING SECTION - HIDDEN -->
+    <!-- TEACHER SECTIONS - HIDDEN -->
     <div class="pending-section" id="pendingSection">
       <h2>⏳ Pending Approvals</h2>
-      <button onclick="addPendingEntry()" style="background:var(--accent);color:white;padding:1rem 2rem;border:none;border-radius:25px;cursor:pointer;font-weight:800;">
+      <button onclick="addPendingEntry()" style="background:var(--accent);color:white;padding:1rem 2rem;border:none;border-radius:25px;cursor:pointer;font-weight:800;margin-bottom:1rem;">
         ➕ ADD STUDENT SUBMISSION
       </button>
       <div id="pendingList"></div>
     </div>
     
-    <!-- PUBLIC LEADERBOARD -->
     <div class="leaderboard">
       <h2>🔥 Live Class Rankings</h2>
       <table>
         <thead>
-          <tr><th>🥇</th><th>👨‍💻 Student</th><th>🌐 Site</th><th>📂 Repo</th><th>🎯 Score</th></tr>
+          <tr><th>🥇</th><th>👨‍💻 Student</th><th>🌐 Site</th><th>📂 Repo</th><th>🎯 Score</th><th>🗑️</th></tr>
         </thead>
         <tbody id="leaderboard"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- TEACHER LOGIN MODAL - ONLY APPEARS WHEN NEEDED -->
-  <div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000;">
-    <div style="background:var(--card); position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); padding:3rem; border-radius:20px; text-align:center; max-width:400px; width:90%;">
+  <!-- CLICK-TO-OPEN LOGIN PROMPT -->
+  <div id="loginPrompt">
+    <div style="background:white;padding:2rem;border-radius:20px;text-align:center;max-width:400px;width:90%;">
       <h2>🔒 Teacher Login</h2>
-      <input type="password" id="teacher-password" placeholder="Enter password" style="width:100%; padding:1rem; border:3px solid var(--accent); border-radius:12px; font-size:1.1rem; margin-bottom:1rem;">
+      <input type="password" id="teacher-password" placeholder="Password" style="width:100%;padding:1rem;border:2px solid var(--accent);border-radius:10px;font-size:1.1rem;margin:1rem 0;">
       <br>
-      <button onclick="login()" style="background:var(--accent);color:white;border:none;padding:1rem 2rem;border-radius:25px;cursor:pointer;font-weight:800;">Login</button>
-      <div id="login-status" style="margin-top:1rem;"></div>
+      <button onclick="login()" style="background:var(--accent);color:white;border:none;padding:1rem 2rem;border-radius:25px;cursor:pointer;font-weight:bold;">Login</button>
+      <div id="login-status" style="margin-top:1rem;color:#dc3545;"></div>
     </div>
   </div>
 
@@ -142,53 +135,55 @@
     let leaderboard = JSON.parse(localStorage.getItem('leaderboard-approved')) || [];
     let pending = JSON.parse(localStorage.getItem('leaderboard-pending')) || [];
 
-    // **PUBLIC VIEW ALWAYS WORKS**
+    // PUBLIC LEADERBOARD ALWAYS VISIBLE
     renderLeaderboard();
 
-    // **TEACHER MODE**
+    // TEACHER ALREADY LOGGED IN?
     if (isLoggedIn) {
-      document.getElementById('teacherControls').style.display = 'block';
+      document.getElementById('teacherControls').innerHTML = '✅ Teacher Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;">Logout</button>';
       document.getElementById('pendingSection').style.display = 'block';
       renderPending();
     }
+
+    // TEACHER BUTTON CLICK
+    document.getElementById('teacherControls').onclick = function(e) {
+      if (!isLoggedIn) {
+        document.getElementById('loginPrompt').style.display = 'flex';
+      }
+    };
 
     function login() {
       if (document.getElementById('teacher-password').value === TEACHER_PASSWORD) {
         isLoggedIn = true;
         localStorage.setItem('teacher-logged-in', 'true');
-        document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('teacherControls').style.display = 'block';
+        document.getElementById('loginPrompt').style.display = 'none';
+        document.getElementById('teacherControls').innerHTML = '✅ Teacher Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;">Logout</button>';
         document.getElementById('pendingSection').style.display = 'block';
+        document.getElementById('teacher-password').value = '';
         renderPending();
       } else {
         document.getElementById('login-status').innerHTML = '❌ Wrong password!';
-        document.getElementById('login-status').style.color = '#dc3545';
       }
     }
 
     function logout() {
       isLoggedIn = false;
       localStorage.removeItem('teacher-logged-in');
-      document.getElementById('teacherControls').style.display = 'none';
+      document.getElementById('teacherControls').innerHTML = '👨‍🏫 TEACHER LOGIN';
       document.getElementById('pendingSection').style.display = 'none';
-      // **NO LOGIN OVERLAY** - clean public view
     }
-
-    // Teacher clicks green button to login
-    document.getElementById('teacherControls').addEventListener('click', (e) => {
-      if (!isLoggedIn) {
-        document.getElementById('loginModal').style.display = 'block';
-      }
-    });
 
     function addPendingEntry() {
       const name = prompt('Student Name:');
-      const site = prompt('Site URL:');
-      const repo = prompt('Repo URL:');
-      if (name && site && repo) {
+      const site = prompt('Site URL (must be github.io):');
+      const repo = prompt('Repo URL (must be github.com):');
+      
+      if (name && site?.includes('github.io') && repo?.includes('github.com')) {
         pending.unshift({name, site, repo, id: Date.now(), timestamp: new Date().toLocaleString()});
         localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
         renderPending();
+      } else {
+        alert('Invalid input! Need name + valid GitHub URLs.');
       }
     }
 
@@ -208,7 +203,12 @@
       const entry = pending.find(e => e.id === id);
       if (entry) {
         const score = Math.floor(Math.random() * 18) + 78;
-        leaderboard.unshift({...entry, score, wave: (score * 0.103).toFixed(1), speed: Math.min(100, score + Math.floor(Math.random()*10))});
+        leaderboard.unshift({
+          ...entry, 
+          score, 
+          wave: (score * 0.103).toFixed(1),
+          speed: Math.min(100, score + Math.floor(Math.random()*10))
+        });
         localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
         pending = pending.filter(e => e.id !== id);
         localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
@@ -226,15 +226,24 @@
     function renderLeaderboard() {
       leaderboard.sort((a,b) => b.score - a.score);
       const tbody = document.getElementById('leaderboard');
-      tbody.innerHTML = leaderboard.map((entry, i) => `
+      const html = leaderboard.map((entry, i) => `
         <tr class="${i<3 ? 'rank-'+(i+1) : ''}">
           <td><strong>${i+1}🏅</strong></td>
           <td><strong>${entry.name}</strong></td>
           <td><a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a></td>
           <td><a href="${entry.repo}" target="_blank" class="repo-link">📂</a></td>
           <td><span class="score-badge ${entry.score>=90 ? 'score-90plus' : ''}">${entry.score}</span></td>
+          ${isLoggedIn ? `<td><button onclick="remove(${entry.id})" style="background:#dc3545;color:white;border:none;padding:0.3rem 0.8rem;border-radius:10px;cursor:pointer;">🗑️</button></td>` : ''}
         </tr>
-      `).join('') || '<tr><td colspan="5" style="text-align:center;padding:2rem;">No entries yet - submit via email!</td></tr>';
+      `).join('') || '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#666;">No entries yet - submit via email to teacher!</td></tr>';
+      
+      tbody.innerHTML = html;
+    }
+
+    function remove(id) {
+      leaderboard = leaderboard.filter(e => e.id !== id);
+      localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
+      renderLeaderboard();
     }
   </script>
 </body>
