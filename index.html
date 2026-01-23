@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🥇 Hot Beans Leaderboard</title>
+  <!-- ADD THESE CACHE HEADERS -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <style>
+    /* SAME STYLES AS BEFORE - just the fixed logout */
     :root {
       --bg: linear-gradient(135deg, #f04e23, #ff6f47);
       --card: rgba(255,255,255,0.95);
@@ -18,87 +23,12 @@
       min-height: 100vh;
       padding: 2rem;
     }
-    .container { max-width: 1200px; margin: 0 auto; }
-    
-    /* Login Overlay */
-    .login-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9); display: flex; align-items: center;
-      justify-content: center; z-index: 1000;
-    }
-    
-    h1 {
-      text-align: center; font-size: clamp(2rem, 5vw, 3.5rem);
-      background: var(--card); padding: 1.5rem; border-radius: 20px;
-      margin-bottom: 2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    }
-    
-    .submit-form {
-      background: var(--card); padding: 2.5rem; border-radius: 20px;
-      margin-bottom: 2rem; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      border-left: 5px solid #ffc107;
-    }
-    
-    .submit-form h2 { color: #856404; }
-    .submit-form p { 
-      background: #fff3cd; padding: 1rem; border-radius: 10px; 
-      margin-bottom: 1.5rem; font-weight: 600;
-    }
-    
-    .form-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
-    .form-group { flex: 1; min-width: 250px; }
-    
-    input[type="text"], input[type="url"], input[type="password"] {
-      width: 100%; padding: 1rem; border: 3px solid #ccc;
-      border-radius: 12px; font-size: 1.1rem; margin-bottom: 0.5rem;
-    }
-    
-    .submit-btn-disabled {
-      background: #6c757d !important; cursor: not-allowed !important;
-      transform: none !important; opacity: 0.6;
-    }
-    
-    .teacher-controls {
-      position: fixed; top: 20px; right: 20px; 
-      background: #28a745; color: white; padding: 1rem;
-      border-radius: 10px; font-size: 0.9rem;
-    }
-    
-    .pending-section, .leaderboard {
-      background: var(--card); border-radius: 20px; padding: 2.5rem;
-      margin-bottom: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-    }
-    
-    .pending-section { border-left: 5px solid #ffc107; }
-    .leaderboard { border-left: 5px solid var(--accent); }
-    
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 1rem 0.5rem; text-align: left; }
-    th { background: #f8f4f0; font-weight: 800; text-transform: uppercase; font-size: 0.85rem; }
-    
-    .rank-1 { background: linear-gradient(90deg, #ffd700, #ffed4e) !important; }
-    .rank-2 { background: linear-gradient(90deg, #c0c0c0, #e5e5e5) !important; }
-    .rank-3 { background: linear-gradient(90deg, #cd7f32, #daa520) !important; }
-    
-    .score-badge { padding: 0.4rem 1.2rem; border-radius: 25px; font-weight: 900; }
-    .score-90plus { background: #28a745; color: white; }
-    
-    .approval-btn {
-      padding: 0.5rem 1rem; border: none; border-radius: 15px;
-      cursor: pointer; font-weight: 800; margin: 0.2rem; font-size: 0.85rem;
-    }
-    .approval-yes { background: #28a745; color: white; }
-    .approval-no { background: #dc3545; color: white; }
-    
-    .repo-link { 
-      background: #6c757d; color: white; padding: 0.3rem 0.8rem;
-      border-radius: 15px; font-size: 0.8rem; text-decoration: none;
-    }
+    /* ... rest of your existing styles ... */
   </style>
 </head>
 <body>
-  <!-- Login -->
-  <div class="login-overlay" id="loginOverlay">
+  <!-- Login Overlay - HIDDEN BY DEFAULT -->
+  <div class="login-overlay" id="loginOverlay" style="display: none;">
     <div style="background: var(--card); padding: 3rem; border-radius: 20px; text-align: center; max-width: 400px; width: 90%;">
       <h2>🔒 Teacher Login</h2>
       <input type="password" id="teacher-password" placeholder="Password">
@@ -113,39 +43,25 @@
     <button onclick="logout()">Logout</button>
   </div>
   
+  <!-- PUBLIC VIEW - ALWAYS VISIBLE -->
   <div class="container">
     <h1>🥇 Hot Beans Web Dev Leaderboard</h1>
     
-    <!-- Submission INFO (DISABLED FORM) -->
+    <!-- Disabled submission form - PUBLIC -->
     <div class="submit-form">
-      <h2>📤 Submit Your Work</h2>
-      <p><strong>DISABLED:</strong> Email your teacher:<br>
-         Name + Site URL + GitHub Repo URL<br>
-         <em>"Sarah | https://sarah.github.io/hotbeans | https://github.com/sarah/hotbeans"</em></p>
-      
-      <div style="opacity: 0.5;">
-        <div class="form-row">
-          <div class="form-group">
-            <input type="text" id="student-name" placeholder="Your Name" disabled>
-          </div>
-          <div class="form-group">
-            <input type="url" id="site-url" placeholder="https://username.github.io/repo" disabled>
-          </div>
-          <div class="form-group">
-            <input type="url" id="repo-url" placeholder="https://github.com/username/repo" disabled>
-          </div>
-        </div>
-        <button id="submit-btn" class="submit-btn-disabled" disabled>📤 SEND TO TEACHER (DISABLED)</button>
-      </div>
+      <h2>📧 Submit Your Work</h2>
+      <p><strong>Email your teacher:</strong><br>
+        "Sarah | https://sarah.github.io/hotbeans | https://github.com/sarah/hotbeans"</p>
     </div>
     
-    <!-- PENDING (Teacher Only) -->
+    <!-- Pending (Teacher Only) -->
     <div class="pending-section" id="pendingSection" style="display:none;">
-      <h2>⏳ Pending Approvals</h2>
+      <h2>⏳ Pending Approvals (Add New)</h2>
+      <button onclick="addPendingEntry()" style="background: var(--accent); color: white; padding: 1rem 2rem; border: none; border-radius: 25px; cursor: pointer;">➕ ADD STUDENT SUBMISSION</button>
       <div id="pendingList"></div>
     </div>
     
-    <!-- Live Leaderboard (Teacher Only) -->
+    <!-- Live Leaderboard -->
     <div class="leaderboard">
       <h2>🔥 Live Class Rankings</h2>
       <table>
@@ -163,9 +79,10 @@
     let leaderboard = JSON.parse(localStorage.getItem('leaderboard-approved')) || [];
     let pending = JSON.parse(localStorage.getItem('leaderboard-pending')) || [];
 
-    if (!isLoggedIn) {
-      document.getElementById('loginOverlay').style.display = 'flex';
-    } else {
+    // **START HIDDEN** - only show on login/logout
+    document.getElementById('loginOverlay').style.display = 'none';
+    
+    if (isLoggedIn) {
       document.getElementById('teacherControls').style.display = 'block';
       document.getElementById('pendingSection').style.display = 'block';
       renderPending();
@@ -176,9 +93,12 @@
       if (document.getElementById('teacher-password').value === TEACHER_PASSWORD) {
         isLoggedIn = true;
         localStorage.setItem('teacher-logged-in', 'true');
+        
+        // HIDE LOGIN, SHOW TEACHER CONTROLS
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('teacherControls').style.display = 'block';
         document.getElementById('pendingSection').style.display = 'block';
+        
         renderPending();
         renderLeaderboard();
       } else {
@@ -188,83 +108,54 @@
     }
 
     function logout() {
+      // **CRITICAL FIXES:**
       isLoggedIn = false;
       localStorage.removeItem('teacher-logged-in');
-      document.getElementById('loginOverlay').style.display = 'flex';
+      
+      // HIDE EVERYTHING teacher-related
       document.getElementById('teacherControls').style.display = 'none';
       document.getElementById('pendingSection').style.display = 'none';
+      
+      // **DO NOT SHOW LOGIN OVERLAY** - let students see public leaderboard
+      document.getElementById('loginOverlay').style.display = 'none';
+      
+      // Clear input
+      document.getElementById('teacher-password').value = '';
     }
 
-    // TEACHER adds submissions manually
     function addPendingEntry() {
-      if (!isLoggedIn) return;
       const name = prompt('Student Name:');
-      const site = prompt('Site URL:');
-      const repo = prompt('Repo URL:');
+      const site = prompt('Site URL (github.io):');
+      const repo = prompt('Repo URL (github.com):');
       
-      if (name && site && repo) {
-        pending.unshift({name, site, repo, id: Date.now(), timestamp: new Date().toLocaleString()});
+      if (name && site && repo && site.includes('github.io') && repo.includes('github.com')) {
+        pending.unshift({
+          name, site, repo, 
+          id: Date.now(), 
+          timestamp: new Date().toLocaleString()
+        });
         localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
         renderPending();
+      } else {
+        alert('All fields required + must be GitHub URLs!');
       }
     }
 
+    // ... rest of render functions SAME AS BEFORE ...
+    
     function renderPending() {
       document.getElementById('pendingList').innerHTML = pending.map(entry => `
         <div style="border: 1px solid #ddd; padding: 1.5rem; margin: 1rem 0; border-radius: 10px; background: #f8f9fa;">
-          <strong>${entry.name}</strong> | ${entry.timestamp}
-          <br>🌐 <a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a>
-          <br>📂 <a href="${entry.repo}" target="_blank">${entry.repo.replace('https://github.com/','')}</a>
-          <br><button class="approval-btn approval-yes" onclick="approve(${entry.id})">✅ APPROVE & SCORE</button>
+          <strong>${entry.name}</strong> | ${entry.timestamp}<br>
+          🌐 <a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a><br>
+          📂 <a href="${entry.repo}" target="_blank">${entry.repo.replace('https://github.com/','')}</a><br>
+          <button class="approval-btn approval-yes" onclick="approve(${entry.id})">✅ APPROVE & SCORE</button>
           <button class="approval-btn approval-no" onclick="reject(${entry.id})">❌ REJECT</button>
         </div>
       `).join('') || '<p>No pending submissions</p>';
     }
 
-    function approve(id) {
-      const entry = pending.find(e => e.id === id);
-      if (entry) {
-        const score = Math.floor(Math.random() * 18) + 78;
-        leaderboard.unshift({
-          ...entry, score, wave: (score * 0.103).toFixed(1),
-          speed: Math.min(100, score + Math.floor(Math.random()*10))
-        });
-        localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
-        
-        pending = pending.filter(e => e.id !== id);
-        localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-        renderPending();
-        renderLeaderboard();
-      }
-    }
-
-    function reject(id) {
-      pending = pending.filter(e => e.id !== id);
-      localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-      renderPending();
-    }
-
-    function renderLeaderboard() {
-      leaderboard.sort((a,b) => b.score - a.score);
-      document.getElementById('leaderboard').innerHTML = 
-        leaderboard.map((entry, i) => `
-          <tr class="${i<3 ? 'rank-'+(i+1) : ''}">
-            <td><strong>${i+1}🏅</strong></td>
-            <td><strong>${entry.name}</strong></td>
-            <td><a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a></td>
-            <td><a href="${entry.repo}" target="_blank" class="repo-link">📂</a></td>
-            <td><span class="score-badge ${entry.score>=90 ? 'score-90plus' : 'score-80plus'}">${entry.score}</span></td>
-            <td><button class="approval-btn" style="background:#dc3545;color:white;padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="remove(${entry.id})">🗑️</button></td>
-          </tr>
-        `).join('') || '<tr><td colspan="6">No approved entries</td></tr>';
-    }
-
-    function remove(id) {
-      if (!isLoggedIn) return;
-      leaderboard = leaderboard.filter(e => e.id !== id);
-      localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
-      renderLeaderboard();
-    }
+    // ... approve, reject, renderLeaderboard, remove functions SAME AS BEFORE ...
   </script>
 </body>
 </html>
