@@ -180,27 +180,37 @@
       document.getElementById('pendingSection').style.display = 'none';
     }
 
-   async function addPendingEntry() {
+  function addPendingEntry() {
   const name = prompt('Student Name:');
-  if (!name) return;
-  
-  const site = prompt('Site URL (must end with .github.io):');
-  if (!site) return;
-  
-  const repo = prompt('Repo URL (must contain github.com):');
-  if (!repo) return;
-  
-  // FIXED VALIDATION - More flexible
-  if (name && site && repo && 
-      site.includes('.github.io') && 
-      repo.includes('github.com')) {
-    pending.unshift({name, site, repo, id: Date.now(), timestamp: new Date().toLocaleString()});
-    localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-    renderPending();
-    alert('✅ Added to pending!');
-  } else {
-    alert('❌ Invalid input!\n• Name: Required\n• Site must contain ".github.io"\n• Repo must contain "github.com"');
+  if (!name || name.trim() === '') {
+    alert('❌ Name required!');
+    return;
   }
+  
+  const site = prompt('Site URL (example: https://username.github.io/repo):\nMust contain "github.io"');
+  if (!site || !site.includes('github.io')) {
+    alert('❌ Site must contain "github.io"!');
+    return;
+  }
+  
+  const repo = prompt('Repo URL (example: https://github.com/username/repo):\nMust contain "github.com"');
+  if (!repo || !repo.includes('github.com')) {
+    alert('❌ Repo must contain "github.com"!');
+    return;
+  }
+  
+  // ✅ SUCCESS - Add to pending
+  pending.unshift({
+    name: name.trim(), 
+    site: site.trim(), 
+    repo: repo.trim(), 
+    id: Date.now() + Math.random(),
+    timestamp: new Date().toLocaleString()
+  });
+  
+  localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+  renderPending();
+  alert(`✅ "${name}" added to pending! Click 🚀 WEBPAGETEST APPROVE`);
 }
 
 
@@ -337,5 +347,6 @@
   </script>
 </body>
 </html>
+
 
 
