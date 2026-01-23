@@ -45,33 +45,32 @@
     document.getElementById('pendingSection').style.display = 'none';
   }
 
-  // ONLY name + site (github.io) required
   function addPendingEntry() {
-    const name = prompt('Student Name:');
-    if (!name || name.trim() === '') {
-      alert('❌ Name required!');
-      return;
-    }
-
-    const site = prompt('Site URL:\nExample: https://username.github.io/repo-name');
-    if (!site || site.trim() === '') {
-      alert('❌ Site URL required!');
-      return;
-    }
-
-    pending.unshift({
-      name: name.trim(),
-      site: site.trim(),
-      // keep a repo field so existing render code works – you can ignore it
-      repo: '#',
-      id: Date.now() + Math.random(),
-      timestamp: new Date().toLocaleString()
-    });
-
-    localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-    renderPending();
-    alert(`✅ "${name}" added! 🚀 Click WEBPAGETEST APPROVE`);
+  const name = prompt('Student Name:');
+  if (!name || name.trim() === '') {
+    alert('❌ Name required!');
+    return;
   }
+  
+  const site = prompt('Site URL (github.io):\nhttps://username.github.io/repo');
+  if (!site || !site.includes('github.io')) {
+    alert('❌ Must be github.io site!');
+    return;
+  }
+  
+  // ✅ ONLY 2 FIELDS - Name + github.io site
+  pending.unshift({
+    name: name.trim(),
+    site: site.trim(),
+    repo: '#',  // Dummy repo link
+    id: Date.now() + Math.random(),
+    timestamp: new Date().toLocaleString()
+  });
+  
+  localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+  renderPending();
+  alert(`✅ "${name}" added! 🚀 Click WEBPAGETEST APPROVE`);
+}
 
   // WebPageTest auto-scoring
   async function approve(id) {
@@ -212,3 +211,4 @@
     renderLeaderboard();
   }
 </script>
+
