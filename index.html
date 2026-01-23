@@ -1,215 +1,387 @@
-<script>
-  const TEACHER_PASSWORD = "hotbeans2026";
-  const WPT_PUBLIC_URL = "https://www.webpagetest.org"; // Public WebPageTest
-  let isLoggedIn = localStorage.getItem('teacher-logged-in') === 'true';
-  let leaderboard = JSON.parse(localStorage.getItem('leaderboard-approved')) || [];
-  let pending = JSON.parse(localStorage.getItem('leaderboard-pending')) || [];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot Beans Leaderboard 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+            padding: 2rem;
+            color: #333;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { 
+            text-align: center; 
+            color: white; 
+            font-size: 3rem; 
+            margin-bottom: 2rem; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .teacher-section { 
+            text-align: center; 
+            margin-bottom: 2rem; 
+        }
+        #teacherControls { 
+            cursor: pointer; 
+            padding: 15px 30px; 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            border-radius: 50px; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+            transition: all 0.3s;
+        }
+        #teacherControls:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.6); }
+        .add-entry-btn { 
+            background: #10b981; 
+            color: white; 
+            border: none; 
+            padding: 15px 30px; 
+            border-radius: 50px; 
+            font-size: 1.1rem; 
+            font-weight: bold;
+            cursor: pointer; 
+            margin: 20px; 
+            box-shadow: 0 4px 15px rgba(16,185,129,0.4);
+            transition: all 0.3s;
+        }
+        .add-entry-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.6); }
+        table { 
+            width: 100%; 
+            background: white; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        th { 
+            background: #1e3a8a; 
+            color: white; 
+            padding: 20px; 
+            text-align: left; 
+            font-weight: 600;
+        }
+        tr.rank-1 { background: linear-gradient(90deg, #ffd700, #ffed4e); }
+        tr.rank-2 { background: linear-gradient(90deg, #c0c0c0, #e5e5e5); }
+        tr.rank-3 { background: linear-gradient(90deg, #cd7f32, #deb887); }
+        tr:hover:not(.rank-1):not(.rank-2):not(.rank-3) { background: #f8fafc; }
+        td { padding: 20px; border-bottom: 1px solid #e2e8f0; }
+        .score-badge { 
+            padding: 8px 16px; 
+            border-radius: 25px; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+        }
+        .score-90plus { background: #10b981; color: white; }
+        .repo-link { color: #3b82f6; text-decoration: none; font-size: 1.2rem; }
+        #pendingSection { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 2rem; 
+            margin-bottom: 2rem; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .pending-entry { 
+            border: 2px solid #ddd; 
+            padding: 2rem; 
+            margin: 1rem 0; 
+            border-radius: 15px; 
+            background: #f8f9fa;
+        }
+        .approval-btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 25px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin: 0 10px; 
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .approval-yes { background: #10b981; color: white; }
+        .approval-no { background: #ef4444; color: white; }
+        .approval-yes:hover, .approval-no:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+        .approval-testing { background: #f59e0b; }
+        #loginPrompt { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.8); 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000;
+        }
+        .login-modal { 
+            background: white; 
+            padding: 3rem; 
+            border-radius: 20px; 
+            text-align: center; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        #teacher-password { 
+            padding: 15px; 
+            font-size: 1.2rem; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 10px; 
+            width: 250px; 
+            margin: 1rem 0;
+        }
+        #testProgress { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            background: #3b82f6; 
+            color: white; 
+            padding: 1rem 2rem; 
+            border-radius: 10px; 
+            box-shadow: 0 10px 30px rgba(59,130,246,0.5);
+        }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            table { font-size: 0.9rem; }
+            td, th { padding: 12px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥫 Hot Beans Leaderboard 2026</h1>
+        
+        <div class="teacher-section">
+            <button id="teacherControls">👨‍🏫 TEACHER LOGIN</button>
+            <br>
+            <button class="add-entry-btn" onclick="addPendingEntry()" style="display:none;" id="addEntryBtn">➕ Add Student Entry</button>
+        </div>
 
-  // Initial render
-  renderLeaderboard();
-  if (isLoggedIn) {
-    document.getElementById('teacherControls').innerHTML =
-      '✅ Teacher Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;">Logout</button>';
-    document.getElementById('pendingSection').style.display = 'block';
-    renderPending();
-  }
+        <!-- Leaderboard Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>🏆 Rank</th>
+                    <th>👤 Name</th>
+                    <th>🌐 Site</th>
+                    <th>📂 Repo</th>
+                    <th>⚡ Speed Index</th>
+                    <th>⭐ Score</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard"></tbody>
+        </table>
 
-  // Teacher button → open login modal
-  document.getElementById('teacherControls').onclick = function () {
-    if (!isLoggedIn) {
-      document.getElementById('loginPrompt').style.display = 'flex';
-    }
-  };
+        <!-- Pending Section (Teacher Only) -->
+        <div id="pendingSection" style="display:none;">
+            <h3 style="color:#1e3a8a;margin-bottom:1rem;">⏳ Pending Approvals</h3>
+            <div id="pendingList"></div>
+        </div>
+    </div>
 
-  function login() {
-    const value = document.getElementById('teacher-password').value;
-    if (value === TEACHER_PASSWORD) {
-      isLoggedIn = true;
-      localStorage.setItem('teacher-logged-in', 'true');
-      document.getElementById('loginPrompt').style.display = 'none';
-      document.getElementById('teacherControls').innerHTML =
-        '✅ Teacher Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;">Logout</button>';
-      document.getElementById('pendingSection').style.display = 'block';
-      document.getElementById('teacher-password').value = '';
-      document.getElementById('login-status').textContent = '';
-      renderPending();
-    } else {
-      document.getElementById('login-status').innerHTML = '❌ Wrong password!';
-    }
-  }
+    <!-- Login Modal -->
+    <div id="loginPrompt">
+        <div class="login-modal">
+            <h3>🔐 Teacher Login</h3>
+            <input id="teacher-password" type="password" placeholder="Enter password...">
+            <br>
+            <button onclick="login()" style="background:#10b981;color:white;border:none;padding:12px 24px;border-radius:25px;font-weight:bold;cursor:pointer;margin-top:1rem;">Login</button>
+            <div id="login-status" style="margin-top:1rem;color:#ef4444;"></div>
+        </div>
+    </div>
 
-  function logout() {
-    isLoggedIn = false;
-    localStorage.removeItem('teacher-logged-in');
-    document.getElementById('teacherControls').innerHTML = '👨‍🏫 TEACHER LOGIN';
-    document.getElementById('pendingSection').style.display = 'none';
-  }
+    <!-- Test Progress -->
+    <div id="testProgress" style="display:none;">
+        Testing: <span id="testUrl"></span> 
+        <span id="testStatus">Starting...</span>
+    </div>
 
-  function addPendingEntry() {
-  const name = prompt('Student Name:');
-  if (!name || name.trim() === '') {
-    alert('❌ Name required!');
-    return;
-  }
-  
-  const site = prompt('Site URL (github.io):https://username.github.io/repo');
-  if (!site || !site.includes('github.io')) {
-    alert('❌ Must be github.io site!');
-    return;
-  }
-  
-  // ✅ ONLY 2 FIELDS - Name + github.io site
-  pending.unshift({
-    name: name.trim(),
-    site: site.trim(),
-    repo: '#',  // Dummy repo link
-    id: Date.now() + Math.random(),
-    timestamp: new Date().toLocaleString()
-  });
-  
-  localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-  renderPending();
-  alert(`✅ "${name}" added! 🚀 Click WEBPAGETEST APPROVE`);
-}
+    <script>
+        const TEACHER_PASSWORD = "hotbeans2026";
+        const WPT_PUBLIC_URL = "https://www.webpagetest.org";
+        let isLoggedIn = localStorage.getItem('teacher-logged-in') === 'true';
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard-approved')) || [];
+        let pending = JSON.parse(localStorage.getItem('leaderboard-pending')) || [];
 
-  // WebPageTest auto-scoring
-  async function approve(id) {
-    const entry = pending.find(e => e.id === id);
-    if (!entry) return;
+        // RENDER FUNCTIONS
+        function renderLeaderboard() {
+            leaderboard.sort((a, b) => b.score - a.score);
+            const tbody = document.getElementById('leaderboard');
+            const html = leaderboard.map((entry, i) => `
+                <tr class="${i < 3 ? 'rank-' + (i + 1) : ''}">
+                    <td><strong>${i + 1}🏅</strong></td>
+                    <td><strong>${entry.name}</strong></td>
+                    <td><a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a></td>
+                    <td><a href="#" class="repo-link">📂</a></td>
+                    <td>${entry.speedIndex || 'N/A'}</td>
+                    <td><span class="score-badge ${entry.score >= 90 ? 'score-90plus' : ''}">${entry.score ?? '-'}</span></td>
+                    ${isLoggedIn ? `<td><button onclick="remove(${entry.id})" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:1rem;">🗑️</button></td>` : ''}
+                </tr>
+            `).join('') || '<tr><td colspan="7" style="text-align:center;padding:3rem;color:#666;"><strong>No entries yet!</strong><br>Students submit via: <em>teacher@school.edu</em></td></tr>';
+            tbody.innerHTML = html;
+        }
 
-    const btn = document.querySelector(`button[onclick="approve(${entry.id})"]`);
-    if (btn) {
-      btn.innerHTML = '⏳ Testing...';
-      btn.className = 'approval-btn approval-testing';
-    }
+        function renderPending() {
+            const html = pending.map(entry => `
+                <div class="pending-entry">
+                    <strong>${entry.name}</strong> | ${entry.timestamp}<br><br>
+                    🌐 <a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a><br><br>
+                    <button class="approval-btn approval-yes" onclick="approve(${entry.id})">🚀 WEBPAGETEST APPROVE</button>
+                    <button class="approval-btn approval-no" onclick="reject(${entry.id})">❌ REJECT</button>
+                </div>
+            `).join('') || '<p style="text-align:center;color:#666;padding:2rem;">No pending submissions</p>';
+            document.getElementById('pendingList').innerHTML = html;
+        }
 
-    try {
-      const testResult = await runWebPageTest(entry.site);
-      leaderboard.unshift({
-        ...entry,
-        score: testResult.score,
-        speedIndex: testResult.speedIndex,
-        ttfb: testResult.ttfb
-      });
+        // INIT
+        renderLeaderboard();
+        if (isLoggedIn) {
+            document.getElementById('teacherControls').innerHTML = '✅ Teacher Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;font-weight:normal;">Logout</button>';
+            document.getElementById('pendingSection').style.display = 'block';
+            document.getElementById('addEntryBtn').style.display = 'inline-block';
+            renderPending();
+        }
 
-      localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
-      pending = pending.filter(e => e.id !== id);
-      localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+        // EVENTS
+        document.getElementById('teacherControls').onclick = function() {
+            if (!isLoggedIn) document.getElementById('loginPrompt').style.display = 'flex';
+        };
 
-      renderPending();
-      renderLeaderboard();
-    } catch (e) {
-      alert('Test failed! Using fallback score: ' + e.message);
-      const score = 85;
-      leaderboard.unshift({ ...entry, score, speedIndex: 'Manual', ttfb: 'N/A' });
-      pending = pending.filter(e => e.id !== id);
-      localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
-      localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-      renderPending();
-      renderLeaderboard();
-    }
-  }
+        function login() {
+            const value = document.getElementById('teacher-password').value;
+            if (value === TEACHER_PASSWORD) {
+                isLoggedIn = true;
+                localStorage.setItem('teacher-logged-in', 'true');
+                document.getElementById('loginPrompt').style.display = 'none';
+                document.getElementById('teacherControls').innerHTML = '✅ Teacher Active | <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;font-weight:normal;">Logout</button>';
+                document.getElementById('pendingSection').style.display = 'block';
+                document.getElementById('addEntryBtn').style.display = 'inline-block';
+                document.getElementById('teacher-password').value = '';
+                document.getElementById('login-status').textContent = '';
+                renderPending();
+            } else {
+                document.getElementById('login-status').innerHTML = '❌ Wrong password!';
+            }
+        }
 
-  // Call WebPageTest public API
-  async function runWebPageTest(url) {
-    document.getElementById('testProgress').style.display = 'flex';
-    document.getElementById('testUrl').textContent = url.replace('https://', '');
+        function logout() {
+            isLoggedIn = false;
+            localStorage.removeItem('teacher-logged-in');
+            document.getElementById('teacherControls').innerHTML = '👨‍🏫 TEACHER LOGIN';
+            document.getElementById('pendingSection').style.display = 'none';
+            document.getElementById('addEntryBtn').style.display = 'none';
+        }
 
-    const testParams = new URLSearchParams({
-      url: url,
-      f: 'json',
-      l: 'London:Chrome'
-    });
+        function addPendingEntry() {
+            const name = prompt('Student Name:');
+            if (!name || name.trim() === '') {
+                alert('❌ Name required!');
+                return;
+            }
+            const site = prompt('Site URL (github.io):\nhttps://username.github.io/repo');
+            if (!site || !site.includes('github.io')) {
+                alert('❌ Must be github.io site!');
+                return;
+            }
+            pending.unshift({
+                name: name.trim(),
+                site: site.trim(),
+                repo: '#',
+                id: Date.now() + Math.random(),
+                timestamp: new Date().toLocaleString()
+            });
+            localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+            renderPending();
+            alert(`✅ "${name}" added! 🚀 Click WEBPAGETEST APPROVE`);
+        }
 
-    // submit test
-    const submitResponse = await fetch(`${WPT_PUBLIC_URL}/runtest.php?${testParams}`);
-    const submitData = await submitResponse.json();
+        async function approve(id) {
+            const entry = pending.find(e => e.id === id);
+            if (!entry) return;
+            const btn = document.querySelector(`button[onclick="approve(${entry.id})"]`);
+            if (btn) {
+                btn.innerHTML = '⏳ Testing...';
+                btn.className = 'approval-btn approval-testing';
+            }
+            try {
+                const testResult = await runWebPageTest(entry.site);
+                leaderboard.unshift({
+                    ...entry,
+                    score: testResult.score,
+                    speedIndex: testResult.speedIndex,
+                    ttfb: testResult.ttfb
+                });
+                localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
+                pending = pending.filter(e => e.id !== id);
+                localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+                renderPending();
+                renderLeaderboard();
+            } catch (e) {
+                alert('Test failed! Using fallback score: ' + e.message);
+                const score = 85;
+                leaderboard.unshift({ ...entry, score, speedIndex: 'Manual', ttfb: 'N/A' });
+                pending = pending.filter(e => e.id !== id);
+                localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
+                localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+                renderPending();
+                renderLeaderboard();
+            }
+        }
 
-    if (!submitData.data || !submitData.data.testId) {
-      document.getElementById('testProgress').style.display = 'none';
-      throw new Error('Failed to submit test');
-    }
+        async function runWebPageTest(url) {
+            document.getElementById('testProgress').style.display = 'block';
+            document.getElementById('testUrl').textContent = url.replace('https://', '');
+            const testParams = new URLSearchParams({
+                url: url,
+                f: 'json',
+                l: 'London:Chrome'
+            });
+            const submitResponse = await fetch(`${WPT_PUBLIC_URL}/runtest.php?${testParams}`);
+            const submitData = await submitResponse.json();
+            if (!submitData.data || !submitData.data.testId) {
+                document.getElementById('testProgress').style.display = 'none';
+                throw new Error('Failed to submit test');
+            }
+            const testId = submitData.data.testId;
+            document.getElementById('testStatus').innerHTML = `Test ID: ${testId} - Waiting...`;
+            let result;
+            for (let i = 0; i < 60; i++) {
+                await new Promise(r => setTimeout(r, 5000));
+                const resultResponse = await fetch(`${WPT_PUBLIC_URL}/result/${testId}/?f=json`);
+                result = await resultResponse.json();
+                if (result.data && result.data.median && result.data.median.SpeedIndex) break;
+                document.getElementById('testStatus').innerHTML = `Test ID: ${testId} - ${(i + 1) * 5}s elapsed...`;
+            }
+            document.getElementById('testProgress').style.display = 'none';
+            if (!result.data || !result.data.median || !result.data.median.SpeedIndex) {
+                throw new Error('Test incomplete - using fallback');
+            }
+            const speedIndex = result.data.median.SpeedIndex;
+            const score = Math.max(50, Math.min(100, 100 - speedIndex / 80));
+            return {
+                score: Math.round(score),
+                speedIndex: `${(speedIndex / 1000).toFixed(1)}s`,
+                ttfb: result.data.median.TTFB ? `${(result.data.median.TTFB / 1000).toFixed(0)}ms` : 'N/A'
+            };
+        }
 
-    const testId = submitData.data.testId;
-    document.getElementById('testStatus').innerHTML =
-      `Test ID: ${testId} - Waiting for results...`;
+        function reject(id) {
+            pending = pending.filter(e => e.id !== id);
+            localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
+            renderPending();
+        }
 
-    // poll results
-    let result;
-    for (let i = 0; i < 60; i++) {
-      await new Promise(r => setTimeout(r, 5000));
-
-      const resultResponse = await fetch(`${WPT_PUBLIC_URL}/result/${testId}/?f=json`);
-      result = await resultResponse.json();
-
-      if (result.data && result.data.median && result.data.median.SpeedIndex) break;
-
-      document.getElementById('testStatus').innerHTML =
-        `Test ID: ${testId} - ${(i + 1) * 5}s elapsed...`;
-    }
-
-    document.getElementById('testProgress').style.display = 'none';
-
-    if (!result.data || !result.data.median || !result.data.median.SpeedIndex) {
-      throw new Error('Test incomplete - using fallback');
-    }
-
-    const speedIndex = result.data.median.SpeedIndex;
-    const score = Math.max(50, Math.min(100, 100 - speedIndex / 80));
-
-    return {
-      score: Math.round(score),
-      speedIndex: `${(speedIndex / 1000).toFixed(1)}s`,
-      ttfb: result.data.median.TTFB
-        ? `${(result.data.median.TTFB / 1000).toFixed(0)}ms`
-        : 'N/A'
-    };
-  }
-
-  function reject(id) {
-    pending = pending.filter(e => e.id !== id);
-    localStorage.setItem('leaderboard-pending', JSON.stringify(pending));
-    renderPending();
-  }
-
-  function renderPending() {
-    const html = pending.map(entry => `
-      <div style="border:1px solid #ddd;padding:1.5rem;margin:1rem 0;border-radius:10px;background:#f8f9fa;">
-        <strong>${entry.name}</strong> | ${entry.timestamp}<br>
-        🌐 <a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a><br>
-        <button class="approval-btn approval-yes" onclick="approve(${entry.id})">🚀 WEBPAGETEST APPROVE</button>
-        <button class="approval-btn approval-no" onclick="reject(${entry.id})">❌ REJECT</button>
-      </div>
-    `).join('') || '<p>No pending submissions</p>';
-
-    document.getElementById('pendingList').innerHTML = html;
-  }
-
-  function renderLeaderboard() {
-    leaderboard.sort((a, b) => b.score - a.score);
-    const tbody = document.getElementById('leaderboard');
-    const html = leaderboard.map((entry, i) => `
-      <tr class="${i < 3 ? 'rank-' + (i + 1) : ''}">
-        <td><strong>${i + 1}🏅</strong></td>
-        <td><strong>${entry.name}</strong></td>
-        <td><a href="${entry.site}" target="_blank">${entry.site.replace('https://','')}</a></td>
-        <td><a href="#" class="repo-link">📂</a></td>
-        <td>${entry.speedIndex || 'N/A'}</td>
-        <td><span class="score-badge ${entry.score >= 90 ? 'score-90plus' : ''}">${entry.score ?? '-'}</span></td>
-        ${isLoggedIn
-          ? `<td><button onclick="remove(${entry.id})" style="background:#dc3545;color:white;border:none;padding:0.3rem 0.8rem;border-radius:10px;cursor:pointer;">🗑️</button></td>`
-          : ''}
-      </tr>
-    `).join('') || '<tr><td colspan="7" style="text-align:center;padding:2rem;color:#666;">No entries yet - submit via email to teacher!</td></tr>';
-
-    tbody.innerHTML = html;
-  }
-
-  function remove(id) {
-    leaderboard = leaderboard.filter(e => e.id !== id);
-    localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
-    renderLeaderboard();
-  }
-</script>
-
-
+        function remove(id) {
+            leaderboard = leaderboard.filter(e => e.id !== id);
+            localStorage.setItem('leaderboard-approved', JSON.stringify(leaderboard));
+            renderLeaderboard();
+        }
+    </script>
+</body>
+</html>
