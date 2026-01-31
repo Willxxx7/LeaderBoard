@@ -1,22 +1,33 @@
 {
   "approved": [
     {
-      "name": "Wills site",
-      "site": "https://willxxx7.github.io/hot-beans-web",
-      "repo": "https://willxxx7.github.io/hot-beans-web/",
-      "score": 90,
-      "speedIndex": "2.0s",
-      "ttfb": "248ms",
-      "avatar": "🧑‍💻",
-      "dateAdded": "2026-01-31",
-      "lastTested": "2026-01-31",
-      "lastUpdated": "2026-01-31",
-      "version": 1
+      "name": "will",
+      "url": "https://willxxx7.github.io/hot-beans-web/",
+      "score": 82,
+      "wave": "8.4",
+      "speed": 91,
+      "id": 1769131662814
+    },
+    {
+      "name": "Sarah Johnson",
+      "url": "https://sarahj.github.io/hot-beans",
+      "score": 96,
+      "wave": 9.8,
+      "speed": 97,
+      "id": 1769131649007
+    },
+    {
+      "name": "John Davies",
+      "url": "https://johnd.github.io/hot-beans",
+      "score": 92,
+      "wave": 9.4,
+      "speed": 93,
+      "id": 1769131648007
     }
   ],
   "pending": [],
   "lastUpdated": "2026-01-31",
-  "totalEntries": 1,
+  "totalEntries": 3,
   "publishedBy": "Teacher",
-  "publishedAt": "2026-01-31T02:01:54.802Z"
+  "publishedAt": "2026-01-31T02:05:44.200Z"
 }
