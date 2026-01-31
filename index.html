@@ -137,29 +137,30 @@
             if (isTeacher) renderPending();
         }
 
-        async function loadFromSheet() {
-            const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv`;
-            try {
-                const response = await fetch(SHEET_URL);
-                const csv = await response.text();
-                const rows = csv.split('\n').slice(1).filter(row => row.trim());
-                
-                pending = rows.map((row, i) => {
-                    const cols = row.split(',').map(c => c.replace(/"/g,'').trim().replace(/'/g, ''));
-                    return {
-                        id: `pending-${i}`,
-                        name: cols[1] || 'Anonymous',
-                        site: cols[2] || '#',
-                        repo: cols[3] || '#',
-                        avatar: '⏳',
-                        status: 'pending'
-                    };
-                });
-            } catch(e) {
-                console.warn('Sheet failed → demo data');
-                leaderboard = getInitialLeaderboard();
-            }
-        }
+       async function loadFromSheet() {
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv';
+    try {
+        const response = await fetch(SHEET_URL);
+        const csv = await response.text();
+        const rows = csv.split('\n').slice(1).filter(row => row.trim());
+        
+        pending = rows.map((row, i) => {
+            const cols = row.split(',').map(c => c.replace(/"/g,'').trim().replace(/'/g, ''));
+            return {
+                id: `pending-${i}`,
+                name: cols[1] || 'Anonymous',
+                site: cols[2] || '#',
+                repo: cols[3] || '#',
+                avatar: '⏳',
+                status: 'pending'
+            };
+        });
+    } catch(e) {
+        console.warn('Sheet failed → demo data');
+        leaderboard = getInitialLeaderboard();
+    }
+}
+
 
         // RENDER FUNCTIONS
         function renderLeaderboard() {
@@ -272,4 +273,5 @@
     </script>
 </body>
 </html>
+
 
