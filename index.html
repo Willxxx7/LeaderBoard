@@ -137,7 +137,7 @@
             if (isTeacher) renderPending();
         }
 
-       async function loadFromSheet() {
+async function loadFromSheet() {
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv';
     try {
         const response = await fetch(SHEET_URL);
@@ -145,21 +145,32 @@
         const rows = csv.split('\n').slice(1).filter(row => row.trim());
         
         pending = rows.map((row, i) => {
+            // Simple split - handles basic CSV
             const cols = row.split(',').map(c => c.replace(/"/g,'').trim().replace(/'/g, ''));
+            
+            // Extract URLs from markdown links [text](url)
+            const extractUrl = (col) => {
+                const match = col.match(/\[.*?\]\((.*?)\)/);
+                return match ? match[1] : col;
+            };
+            
             return {
                 id: `pending-${i}`,
                 name: cols[1] || 'Anonymous',
-                site: cols[2] || '#',
-                repo: cols[3] || '#',
+                site: extractUrl(cols[2] || cols[3] || '#'),  // Try C then D
+                repo: extractUrl(cols[3] || cols[4] || '#'),
                 avatar: '⏳',
                 status: 'pending'
             };
-        });
+        }).filter(p => p.name && p.site);  // Only valid entries
+        
+        console.log(`✅ Loaded ${pending.length} pending entries:`, pending);
     } catch(e) {
         console.warn('Sheet failed → demo data');
-        leaderboard = getInitialLeaderboard();
+        pending = [];
     }
 }
+
 
 
         // RENDER FUNCTIONS
@@ -273,6 +284,7 @@
     </script>
 </body>
 </html>
+
 
 
 
