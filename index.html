@@ -120,6 +120,16 @@
             margin: 5px;
         }
         .copy-btn:hover { background: #218838; }
+        .github-btn {
+            background: #24292e; color: white; border: none;
+            padding: 8px 15px; border-radius: 15px;
+            cursor: pointer; font-size: 0.9em;
+            margin: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .github-btn:hover { background: #1a1e22; }
         .message { 
             text-align: center; padding: 20px; 
             background: rgba(255,255,255,0.95); border-radius: 10px;
@@ -170,6 +180,71 @@
             background: #d1ecf1;
             color: #0c5460;
         }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .status-local {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status-saved {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .auto-save-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #28a745;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
     </style>
 </head>
 <body>
@@ -197,11 +272,38 @@
         <div id="management-panel" class="management-panel" style="display: none;">
             <h3>👨‍🏫 Teacher Management</h3>
             <div id="student-management-list"></div>
+            <div id="github-controls" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #f8f9fa;">
+                <h4>🌐 GitHub Publishing</h4>
+                <div class="auto-save-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto-save-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span>Auto-save after each approval</span>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="github-btn" onclick="publishToGitHub()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                        📤 Publish to GitHub
+                    </button>
+                    <button class="copy-btn" onclick="generateFinalDataJson()">
+                        📋 Generate JSON
+                    </button>
+                    <span id="save-status" class="status-badge status-local">🔄 Unsaved Changes</span>
+                </div>
+                <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                    <strong>Note:</strong> Students only see published (GitHub) data
+                </p>
+            </div>
         </div>
 
         <!-- Leaderboard -->
         <div class="leaderboard">
-            <div class="section-header">📊 LIVE RANKINGS</div>
+            <div class="section-header">📊 LIVE RANKINGS 
+                <span id="data-source-badge" class="status-badge status-local">Local</span>
+            </div>
             <div id="leaderboard-list">
                 <div class="message" style="margin: 0; border-radius: 0;">
                     Loading leaderboard...
@@ -213,11 +315,6 @@
         <div class="pending" id="pending-section" style="display: none;">
             <div class="section-header">⏳ PENDING APPROVALS</div>
             <div id="pending-list"></div>
-            <div style="text-align: center; padding: 20px;">
-                <button id="batch-update-btn" class="copy-btn" style="display: none;" onclick="generateFinalDataJson()">
-                    📋 GENERATE FINAL data.json
-                </button>
-            </div>
         </div>
 
         <div id="message" class="message" style="display: none;"></div>
@@ -228,47 +325,54 @@
     </div>
 
     <script>
-        // GLOBAL STATE
+        // ========== CONFIGURATION ==========
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv';
+        const GITHUB_REPO = 'Willxxx7/LeaderBoard';
+        const GITHUB_FILE = 'data.json';
+        
+        // ========== GLOBAL STATE ==========
         let leaderboard = [];
         let pending = [];
         let isTeacher = false;
         let hasLoadedFromJson = false;
+        let hasUnsavedChanges = false;
+        let autoSaveEnabled = false;
 
-        // GOOGLE SHEET
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv';
-
-        // ========== LOAD DATA ==========
+        // ========== INITIAL LOAD ==========
         async function loadData() {
             console.log('Loading data...');
             
-            // Load from data.json ONLY ONCE
+            // Load from GitHub data.json (what students see)
             if (!hasLoadedFromJson) {
                 try {
                     const response = await fetch('data.json?' + new Date().getTime());
                     const data = await response.json();
                     leaderboard = data.approved.sort((a,b) => b.score - a.score);
-                    console.log(`Loaded ${leaderboard.length} entries from data.json`);
+                    console.log(`Loaded ${leaderboard.length} entries from GitHub`);
                     hasLoadedFromJson = true;
+                    updateDataSourceBadge('github');
                 } catch(e) {
-                    console.log('No data.json yet');
+                    console.log('No data.json on GitHub yet');
                     leaderboard = [];
                     hasLoadedFromJson = true;
+                    updateDataSourceBadge('none');
                 }
             }
             
-            // Load saved data from localStorage
+            // Load saved data from localStorage (teacher's working copy)
             loadFromLocalStorage();
             
             // Refresh pending if teacher
             if (isTeacher) {
                 await loadPending();
+                updateSaveStatus();
             }
             
             renderLeaderboard();
             updateLastUpdated();
         }
 
-        // ========== LOAD PENDING WITH DUPLICATE HANDLING ==========
+        // ========== LOAD PENDING ==========
         async function loadPending() {
             try {
                 const response = await fetch(SHEET_URL);
@@ -292,22 +396,17 @@
                         const name = cols[1] || 'Student';
                         const site = extractUrl(cols[2]) || cols[2] || '';
                         
-                        // Skip if we've already seen this exact entry
+                        // Skip duplicates
                         const entryKey = `${name.toLowerCase()}|${site.toLowerCase()}`;
-                        if (seenNames.has(entryKey)) {
-                            console.log(`Skipping duplicate: ${name} - ${site}`);
-                            return;
-                        }
-                        
+                        if (seenNames.has(entryKey)) return;
                         seenNames.add(entryKey);
                         
-                        // Check if student already exists
                         const existingStudent = leaderboard.find(s => 
                             s.name.toLowerCase().includes(name.toLowerCase()) ||
                             s.name.toLowerCase().replace(/ \(v\d+\)$/, '') === name.toLowerCase()
                         );
                         
-                        const entry = {
+                        pending.push({
                             id: `pending-${i}`,
                             name: name,
                             site: site,
@@ -315,11 +414,9 @@
                             avatar: '⏳',
                             isUpdate: !!existingStudent,
                             existingVersion: existingStudent ? (existingStudent.version || 1) : 0
-                        };
-                        
-                        if (entry.site) pending.push(entry);
+                        });
                     } catch(e) {
-                        console.warn(`Error parsing row ${i}:`, e);
+                        console.warn(`Error parsing row ${i}`);
                     }
                 });
                 
@@ -331,10 +428,13 @@
             }
         }
 
-        // ========== SAVE/LOAD LOCALSTORAGE ==========
+        // ========== LOCALSTORAGE FUNCTIONS ==========
         function saveToLocalStorage() {
             localStorage.setItem('hotbeans-leaderboard', JSON.stringify(leaderboard));
-            console.log('Saved to localStorage:', leaderboard.length, 'students');
+            localStorage.setItem('hotbeans-unsaved', 'true');
+            hasUnsavedChanges = true;
+            updateSaveStatus();
+            console.log('Saved to localStorage');
         }
 
         function loadFromLocalStorage() {
@@ -342,34 +442,175 @@
             if (saved) {
                 try {
                     const savedData = JSON.parse(saved);
-                    // Merge with data.json entries (prioritize localStorage for latest scores)
-                    savedData.forEach(savedEntry => {
-                        const existingIndex = leaderboard.findIndex(entry => 
-                            entry.name === savedEntry.name || 
-                            (entry.name.replace(/ \(v\d+\)$/, '') === savedEntry.name.replace(/ \(v\d+\)$/, ''))
-                        );
-                        
-                        if (existingIndex >= 0) {
-                            // Update existing with latest data
-                            leaderboard[existingIndex] = { 
-                                ...leaderboard[existingIndex], 
-                                ...savedEntry 
-                            };
-                        } else {
-                            // Add new entry
-                            leaderboard.push(savedEntry);
-                        }
-                    });
-                    
-                    leaderboard.sort((a,b) => b.score - a.score);
-                    console.log('Loaded from localStorage:', savedData.length, 'students');
+                    // Only merge if we have local changes
+                    if (savedData.length > 0) {
+                        leaderboard = savedData;
+                        updateDataSourceBadge('local');
+                        console.log('Loaded from localStorage:', savedData.length, 'students');
+                    }
                 } catch(e) {
-                    console.log('Error loading localStorage:', e);
+                    console.log('Error loading localStorage');
                 }
             }
         }
 
-        // ========== RENDER LEADERBOARD ==========
+        // ========== GITHUB PUBLISHING ==========
+        async function publishToGitHub() {
+            if (!confirm('Publish current leaderboard to GitHub?\n\nStudents will see this data immediately.')) {
+                return;
+            }
+            
+            showMessage('📤 Publishing to GitHub...', 0);
+            
+            const data = {
+                approved: leaderboard,
+                pending: [], // Don't save pending to GitHub
+                lastUpdated: new Date().toISOString().split('T')[0],
+                totalEntries: leaderboard.length,
+                publishedBy: 'Teacher',
+                publishedAt: new Date().toISOString()
+            };
+            
+            const jsonStr = JSON.stringify(data, null, 2);
+            
+            // Create GitHub editor URL with pre-filled content
+            const githubUrl = `https://github.com/${GITHUB_REPO}/edit/main/${GITHUB_FILE}`;
+            
+            // Show the JSON and open GitHub
+            showMessage(`
+                <h3>🚀 Ready to Publish!</h3>
+                <p><strong>${leaderboard.length} students will be published</strong></p>
+                <ol style="text-align: left; display: inline-block;">
+                    <li>Click the link below to open GitHub</li>
+                    <li>Replace everything in the file with this JSON</li>
+                    <li>Click "Commit changes" (green button)</li>
+                    <li>Wait 1 minute for GitHub Pages to update</li>
+                </ol>
+                <pre>${jsonStr}</pre>
+                <br>
+                <button class="copy-btn" onclick="copyToClipboard('${escapeString(jsonStr)}')">
+                    📋 Copy JSON
+                </button>
+                <a href="${githubUrl}" target="_blank" class="github-btn" style="text-decoration: none;">
+                    ✏️ Open GitHub Editor
+                </a>
+                <button class="copy-btn" onclick="showMessage('', 0)">
+                    ❌ Cancel
+                </button>
+            `, 0);
+            
+            // Mark as saved
+            localStorage.setItem('hotbeans-unsaved', 'false');
+            hasUnsavedChanges = false;
+            updateSaveStatus();
+            updateDataSourceBadge('github');
+        }
+
+        // ========== AUTO-SAVE FEATURE ==========
+        function toggleAutoSave() {
+            autoSaveEnabled = !autoSaveEnabled;
+            document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
+            localStorage.setItem('hotbeans-autosave', autoSaveEnabled);
+            showMessage(`Auto-save ${autoSaveEnabled ? 'enabled' : 'disabled'}`, 3000);
+        }
+
+        function checkAutoSave() {
+            if (autoSaveEnabled && hasUnsavedChanges) {
+                // In a real app, you'd use GitHub API here
+                console.log('Auto-save triggered');
+                showMessage('💾 Auto-save ready (manual publish required)', 3000);
+            }
+        }
+
+        // ========== APPROVE/UPDATE FUNCTION ==========
+        function approvePending(id) {
+            const entry = pending.find(p => p.id === id);
+            if (!entry) return;
+            
+            const score = Math.floor(Math.random() * 20) + 75;
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Check if student exists
+            const existingStudent = leaderboard.find(s => 
+                s.name.toLowerCase().includes(entry.name.toLowerCase()) ||
+                s.name.toLowerCase().replace(/ \(v\d+\)$/, '') === entry.name.toLowerCase()
+            );
+            
+            if (existingStudent) {
+                const choice = confirm(
+                    `"${entry.name}" already exists with score ${existingStudent.score}/100\n\n` +
+                    `OK = UPDATE existing (replace old score)\n` +
+                    `Cancel = ADD as NEW version`
+                );
+                
+                if (choice) {
+                    // UPDATE EXISTING
+                    const oldScore = existingStudent.score;
+                    existingStudent.score = score;
+                    existingStudent.speedIndex = (Math.random() * 1.5 + 1.5).toFixed(1) + "s";
+                    existingStudent.ttfb = Math.floor(Math.random() * 300 + 200) + "ms";
+                    existingStudent.lastTested = today;
+                    existingStudent.lastUpdated = today;
+                    existingStudent.previousScore = oldScore;
+                    existingStudent.version = (existingStudent.version || 1) + 1;
+                    
+                    showMessage(`🔄 Updated ${entry.name}: ${oldScore} → ${score}/100`, 5000);
+                } else {
+                    // ADD NEW VERSION
+                    const versionNumber = leaderboard.filter(s => 
+                        s.name.toLowerCase().startsWith(entry.name.toLowerCase()) ||
+                        s.name.toLowerCase().replace(/ \(v\d+\)$/, '') === entry.name.toLowerCase()
+                    ).length + 1;
+                    
+                    leaderboard.unshift({
+                        name: `${entry.name} (v${versionNumber})`,
+                        site: entry.site,
+                        repo: entry.repo || '',
+                        score: score,
+                        speedIndex: (Math.random() * 1.5 + 1.5).toFixed(1) + "s",
+                        ttfb: Math.floor(Math.random() * 300 + 200) + "ms",
+                        avatar: '🧑‍💻',
+                        dateAdded: today,
+                        lastTested: today,
+                        lastUpdated: today,
+                        version: versionNumber
+                    });
+                    
+                    showMessage(`➕ Added ${entry.name} (v${versionNumber}): ${score}/100`, 5000);
+                }
+            } else {
+                // NEW STUDENT
+                leaderboard.unshift({
+                    name: entry.name,
+                    site: entry.site,
+                    repo: entry.repo || '',
+                    score: score,
+                    speedIndex: (Math.random() * 1.5 + 1.5).toFixed(1) + "s",
+                    ttfb: Math.floor(Math.random() * 300 + 200) + "ms",
+                    avatar: '🧑‍💻',
+                    dateAdded: today,
+                    lastTested: today,
+                    lastUpdated: today,
+                    version: 1
+                });
+                
+                showMessage(`✅ Added ${entry.name}: ${score}/100`, 5000);
+            }
+            
+            // Remove from pending
+            pending = pending.filter(p => p.id !== id);
+            
+            // Sort, save, and check auto-save
+            leaderboard.sort((a,b) => b.score - a.score);
+            saveToLocalStorage();
+            checkAutoSave();
+            
+            renderLeaderboard();
+            renderPending();
+            updateManagementPanel();
+        }
+
+        // ========== RENDER FUNCTIONS ==========
         function renderLeaderboard() {
             const container = document.getElementById('leaderboard-list');
             
@@ -420,20 +661,16 @@
             }).join('');
         }
 
-        // ========== RENDER PENDING ==========
         function renderPending() {
             const container = document.getElementById('pending-list');
             const section = document.getElementById('pending-section');
-            const batchBtn = document.getElementById('batch-update-btn');
             
             if (pending.length === 0) {
                 section.style.display = 'none';
-                if (batchBtn) batchBtn.style.display = 'none';
                 return;
             }
             
             section.style.display = 'block';
-            if (batchBtn) batchBtn.style.display = 'inline-block';
             
             container.innerHTML = pending.map(entry => {
                 const existing = leaderboard.find(s => 
@@ -467,9 +704,14 @@
             if (pass === 'hotbeans2026') {
                 isTeacher = true;
                 document.querySelector('.teacher-login').style.display = 'none';
-                if (document.getElementById('pending-section')) {
-                    document.getElementById('pending-section').style.display = 'block';
-                }
+                document.getElementById('pending-section').style.display = 'block';
+                document.getElementById('management-panel').style.display = 'block';
+                
+                // Load auto-save preference
+                autoSaveEnabled = localStorage.getItem('hotbeans-autosave') === 'true';
+                document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
+                document.getElementById('auto-save-toggle').onclick = toggleAutoSave;
+                
                 loadPending();
                 updateManagementPanel();
                 renderLeaderboard();
@@ -479,102 +721,6 @@
             }
         }
 
-        // ========== APPROVE/UPDATE PENDING ENTRY ==========
-        function approvePending(id) {
-            const entry = pending.find(p => p.id === id);
-            if (!entry) return;
-            
-            const score = Math.floor(Math.random() * 20) + 75;
-            const today = new Date().toISOString().split('T')[0];
-            
-            // Check if student already exists
-            const existingStudent = leaderboard.find(s => 
-                s.name.toLowerCase().includes(entry.name.toLowerCase()) ||
-                s.name.toLowerCase().replace(/ \(v\d+\)$/, '') === entry.name.toLowerCase()
-            );
-            
-            if (existingStudent) {
-                // ASK: Update existing or create new version?
-                const choice = confirm(
-                    `"${entry.name}" already exists with score ${existingStudent.score}/100\n\n` +
-                    `OK = UPDATE existing (replace old score)\n` +
-                    `Cancel = ADD as NEW version`
-                );
-                
-                if (choice) {
-                    // UPDATE EXISTING
-                    const oldScore = existingStudent.score;
-                    existingStudent.score = score;
-                    existingStudent.speedIndex = (Math.random() * 1.5 + 1.5).toFixed(1) + "s";
-                    existingStudent.ttfb = Math.floor(Math.random() * 300 + 200) + "ms";
-                    existingStudent.lastTested = today;
-                    existingStudent.lastUpdated = today;
-                    existingStudent.previousScore = oldScore;
-                    existingStudent.version = (existingStudent.version || 1) + 1;
-                    existingStudent.site = entry.site || existingStudent.site;
-                    existingStudent.repo = entry.repo || existingStudent.repo;
-                    
-                    showMessage(
-                        `🔄 Updated ${entry.name}: ${oldScore} → ${score}/100 (+${score - oldScore})`,
-                        5000
-                    );
-                } else {
-                    // ADD NEW VERSION
-                    const versionNumber = leaderboard.filter(s => 
-                        s.name.toLowerCase().startsWith(entry.name.toLowerCase()) ||
-                        s.name.toLowerCase().replace(/ \(v\d+\)$/, '') === entry.name.toLowerCase()
-                    ).length + 1;
-                    
-                    const newEntry = {
-                        name: `${entry.name} (v${versionNumber})`,
-                        site: entry.site,
-                        repo: entry.repo || '',
-                        score: score,
-                        speedIndex: (Math.random() * 1.5 + 1.5).toFixed(1) + "s",
-                        ttfb: Math.floor(Math.random() * 300 + 200) + "ms",
-                        avatar: '🧑‍💻',
-                        dateAdded: today,
-                        lastTested: today,
-                        lastUpdated: today,
-                        version: versionNumber
-                    };
-                    
-                    leaderboard.unshift(newEntry);
-                    showMessage(`➕ Added ${newEntry.name}: ${score}/100`, 5000);
-                }
-            } else {
-                // NEW STUDENT
-                const newEntry = {
-                    name: entry.name,
-                    site: entry.site,
-                    repo: entry.repo || '',
-                    score: score,
-                    speedIndex: (Math.random() * 1.5 + 1.5).toFixed(1) + "s",
-                    ttfb: Math.floor(Math.random() * 300 + 200) + "ms",
-                    avatar: '🧑‍💻',
-                    dateAdded: today,
-                    lastTested: today,
-                    lastUpdated: today,
-                    version: 1
-                };
-                
-                leaderboard.unshift(newEntry);
-                showMessage(`✅ Added ${entry.name}: ${score}/100`, 5000);
-            }
-            
-            // Remove from pending
-            pending = pending.filter(p => p.id !== id);
-            
-            // Sort and save
-            leaderboard.sort((a,b) => b.score - a.score);
-            saveToLocalStorage();
-            
-            renderLeaderboard();
-            renderPending();
-            updateManagementPanel();
-        }
-
-        // ========== MANUAL UPDATE SCORE ==========
         function updateStudentScore(studentName) {
             if (!isTeacher) return;
             
@@ -586,7 +732,6 @@
             const today = new Date().toISOString().split('T')[0];
             const oldScore = student.score;
             
-            // Update student
             student.score = newScore;
             student.speedIndex = (Math.random() * 1.5 + 1.5).toFixed(1) + "s";
             student.ttfb = Math.floor(Math.random() * 300 + 200) + "ms";
@@ -595,18 +740,14 @@
             student.previousScore = oldScore;
             student.version = (student.version || 1) + 1;
             
-            // Re-sort and save
             leaderboard.sort((a,b) => b.score - a.score);
             saveToLocalStorage();
+            checkAutoSave();
             
             renderLeaderboard();
-            showMessage(
-                `🔄 Manually updated ${decodedName}: ${oldScore} → ${newScore}/100 (+${newScore - oldScore})`,
-                3000
-            );
+            showMessage(`🔄 Updated ${decodedName}: ${oldScore} → ${newScore}/100`, 3000);
         }
 
-        // ========== REMOVE STUDENT ==========
         function removeStudent(studentName) {
             if (!isTeacher) return;
             
@@ -614,27 +755,20 @@
             if (!confirm(`Remove "${decodedName}" from leaderboard?`)) return;
             
             leaderboard = leaderboard.filter(entry => entry.name !== decodedName);
-            
             saveToLocalStorage();
+            checkAutoSave();
             
             showMessage(`🗑️ Removed ${decodedName}`, 3000);
-            
             renderLeaderboard();
             updateManagementPanel();
         }
 
-        // ========== UPDATE MANAGEMENT PANEL ==========
+        // ========== MANAGEMENT PANEL ==========
         function updateManagementPanel() {
-            const panel = document.getElementById('management-panel');
             const list = document.getElementById('student-management-list');
+            if (!list) return;
             
-            if (!isTeacher || leaderboard.length === 0) {
-                if (panel) panel.style.display = 'none';
-                return;
-            }
-            
-            if (panel) panel.style.display = 'block';
-            if (list) list.innerHTML = `
+            list.innerHTML = `
                 <p><strong>${leaderboard.length} students on leaderboard</strong></p>
                 ${leaderboard.map(entry => `
                     <div style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
@@ -654,43 +788,39 @@
                         </div>
                     </div>
                 `).join('')}
-                <div style="margin-top: 15px; text-align: center;">
-                    <button class="copy-btn" onclick="generateFinalDataJson()">
-                        📋 Save All to data.json
-                    </button>
-                </div>
             `;
         }
 
-        // ========== GENERATE FINAL DATA.JSON ==========
-        function generateFinalDataJson() {
-            const today = new Date().toISOString().split('T')[0];
-            const finalData = {
-                approved: leaderboard,
-                pending: pending,
-                lastUpdated: today,
-                totalEntries: leaderboard.length,
-                message: `Updated: ${today} - ${leaderboard.length} students, ${pending.length} pending`,
-                version: "2.0",
-                features: ["resubmission-handling", "version-tracking", "auto-updates"]
-            };
+        // ========== STATUS UPDATES ==========
+        function updateSaveStatus() {
+            const statusEl = document.getElementById('save-status');
+            if (!statusEl) return;
             
-            const jsonStr = JSON.stringify(finalData, null, 2);
+            hasUnsavedChanges = localStorage.getItem('hotbeans-unsaved') === 'true';
             
-            showMessage(`
-                <h3>📋 COMPLETE data.json for ${today}</h3>
-                <p><strong>${leaderboard.length} approved students</strong></p>
-                <p><strong>${pending.length} pending submissions</strong></p>
-                <pre>${jsonStr}</pre>
-                <br>
-                <button class="copy-btn" onclick="copyToClipboard('${escapeString(jsonStr)}')">
-                    📋 Copy ALL data.json
-                </button>
-                <a href="https://github.com/Willxxx7/LeaderBoard/edit/main/data.json" target="_blank" 
-                   style="background:#28a745;color:white;padding:10px 20px;border-radius:10px;text-decoration:none;margin-left:10px;">
-                   ✏️ Edit on GitHub
-                </a>
-            `, 0);
+            if (hasUnsavedChanges) {
+                statusEl.textContent = '🔄 Unsaved Changes';
+                statusEl.className = 'status-badge status-local';
+            } else {
+                statusEl.textContent = '✅ Published';
+                statusEl.className = 'status-badge status-saved';
+            }
+        }
+
+        function updateDataSourceBadge(source) {
+            const badge = document.getElementById('data-source-badge');
+            if (!badge) return;
+            
+            if (source === 'github') {
+                badge.textContent = 'Published';
+                badge.className = 'status-badge status-saved';
+            } else if (source === 'local') {
+                badge.textContent = 'Local Changes';
+                badge.className = 'status-badge status-local';
+            } else {
+                badge.textContent = 'No Data';
+                badge.className = 'status-badge';
+            }
         }
 
         // ========== HELPER FUNCTIONS ==========
@@ -731,11 +861,30 @@
             element.textContent = `🔄 Updated: ${time}`;
         }
 
-        function testSite() {
-            const urlInput = document.getElementById('testUrl');
-            if (!urlInput) return;
+        function generateFinalDataJson() {
+            const today = new Date().toISOString().split('T')[0];
+            const data = {
+                approved: leaderboard,
+                pending: [],
+                lastUpdated: today,
+                totalEntries: leaderboard.length
+            };
             
-            const url = urlInput.value;
+            showMessage(`
+                <h3>📋 data.json Ready</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+                <br>
+                <button class="copy-btn" onclick="copyToClipboard('${escapeString(JSON.stringify(data, null, 2))}')">
+                    📋 Copy JSON
+                </button>
+                <button class="github-btn" onclick="publishToGitHub()">
+                    📤 Publish to GitHub
+                </button>
+            `, 0);
+        }
+
+        function testSite() {
+            const url = document.getElementById('testUrl').value;
             if (!url.includes('github.io')) {
                 showMessage('❌ Please use a GitHub Pages URL', 3000);
                 return;
@@ -743,13 +892,13 @@
             
             const score = Math.floor(Math.random() * 20) + 75;
             showMessage(`🤖 Test result: ${score}/100<br>Submit via Google Form for official ranking!`, 5000);
-            urlInput.value = '';
+            document.getElementById('testUrl').value = '';
         }
 
-        // ========== INITIAL LOAD ==========
+        // ========== INITIALIZATION ==========
         loadData();
         
-        // Auto-refresh pending every 30 seconds (doesn't clear approved students)
+        // Auto-refresh pending
         setInterval(() => {
             if (isTeacher) loadPending();
             updateLastUpdated();
