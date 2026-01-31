@@ -3,31 +3,44 @@
     {
       "name": "Sarah Johnson",
       "url": "https://sarahj.github.io/hot-beans",
-      "score": 96,
+      "score": 94,
       "wave": 9.8,
-      "speed": 97,
-      "id": 1769131649007
+      "speed": "2.5s",
+      "id": 1769131649007,
+      "previousScore": 96,
+      "ttfb": "127ms",
+      "lastUpdated": "2026-01-31",
+      "lastTested": "2026-01-31"
     },
     {
       "name": "John Davies",
       "url": "https://johnd.github.io/hot-beans",
       "score": 92,
       "wave": 9.4,
-      "speed": 93,
-      "id": 1769131648007
+      "speed": "1.3s",
+      "id": 1769131648007,
+      "previousScore": 92,
+      "ttfb": "306ms",
+      "lastUpdated": "2026-01-31",
+      "lastTested": "2026-01-31"
     },
     {
       "name": "will",
       "url": "https://willxxx7.github.io/hot-beans-web/",
-      "score": 82,
+      "score": 79,
       "wave": "8.4",
-      "speed": 91,
-      "id": 1769131662814
+      "speed": "2.1s",
+      "id": 1769131662814,
+      "previousScore": 82,
+      "ttfb": "191ms",
+      "lastUpdated": "2026-01-31",
+      "lastTested": "2026-01-31"
     }
   ],
   "pending": [],
-  "lastUpdated": "2026-01-31",
+  "lastUpdated": "2026-01-31T03:41:43.066Z",
   "totalEntries": 3,
   "publishedBy": "Teacher",
-  "publishedAt": "2026-01-31T02:12:56.704Z"
+  "publishedAt": "2026-01-31T02:12:56.704Z",
+  "workflowRun": true
 }
