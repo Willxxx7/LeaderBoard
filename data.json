@@ -1,6 +1,22 @@
 {
-  "approved": [],
+  "approved": [
+    {
+      "name": "Wills site",
+      "site": "https://willxxx7.github.io/hot-beans-web",
+      "repo": "https://willxxx7.github.io/hot-beans-web/",
+      "score": 90,
+      "speedIndex": "2.0s",
+      "ttfb": "248ms",
+      "avatar": "🧑‍💻",
+      "dateAdded": "2026-01-31",
+      "lastTested": "2026-01-31",
+      "lastUpdated": "2026-01-31",
+      "version": 1
+    }
+  ],
   "pending": [],
-  "lastUpdated": "2026-01-30",
-  "totalEntries": 0
+  "lastUpdated": "2026-01-31",
+  "totalEntries": 1,
+  "publishedBy": "Teacher",
+  "publishedAt": "2026-01-31T02:01:54.802Z"
 }
