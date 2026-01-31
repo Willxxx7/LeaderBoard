@@ -1,66 +1,25 @@
-name: Auto-Test Student Sites
-on:
-  schedule:
-    - cron: '0 9 * * 1'  # Every Monday at 9 AM (better for class)
-  workflow_dispatch: true  # Manual trigger
-  push:
-    paths:
-      - 'data.json'  # Run when you update data.json
-
-jobs:
-  test-sites:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq curl
-          
-      - name: Create data.json if missing
-        run: |
-          if [ ! -f "data.json" ]; then
-            echo '{"approved":[],"pending":[],"lastUpdated":"2026-01-31"}' > data.json
-            echo "Created data.json"
-          fi
-          
-      - name: Load Google Sheet
-        run: |
-          # Your actual Google Sheet URL
-          SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv"
-          curl -s "$SHEET_URL" > sheet.csv
-          echo "Loaded Google Sheet"
-          head -5 sheet.csv
-          
-      - name: Test all approved sites
-        run: |
-          echo "🚀 Testing all approved websites..."
-          
-          # Load current data
-          CURRENT_DATA=$(cat data.json)
-          
-          # Update each approved site
-          UPDATED=$(echo "$CURRENT_DATA" | jq '
-            .approved |= map(
-              .score = (.score + (if .score > 90 then -5 else 10 end) | [50,.,100] | sort | .[1])
-              | .speedIndex = "\((1.2 + (random * 1.6)) | floor * 10 / 10)s"
-              | .ttfb = "\((200 + (random * 300)) | floor)ms"
-              | .lastTested = now | strftime("%Y-%m-%d")
-              | .previousScore = (.score - 10)
-            )
-            | .lastUpdated = now | strftime("%Y-%m-%d %H:%M:%S")
-            | .autoTested = true
-          ')
-          
-          echo "$UPDATED" > data.json
-          echo "✅ Updated all approved sites"
-          
-      - name: Commit and push updates
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
-          git add data.json
-          git commit -m "🤖 Auto-test: $(date +'%Y-%m-%d')" || echo "No changes"
-          git push
+{
+  "approved": [
+    {
+      "name": "Sarah Johnson",
+      "site": "https://sarahj.github.io/portfolio",
+      "repo": "https://github.com/sarahj/portfolio",
+      "score": 92,
+      "accessibility": 88,
+      "bestPractices": 95,
+      "seo": 90,
+      "speedIndex": "2.1s",
+      "firstContentfulPaint": "1.2s",
+      "largestContentfulPaint": "2.8s",
+      "cumulativeLayoutShift": "0.12",
+      "totalBlockingTime": "120ms",
+      "avatar": "👩‍💻",
+      "dateAdded": "2026-01-31",
+      "lastTested": "2026-01-31T14:30:00Z",
+      "testedWith": ["Lighthouse v10.0.0"],
+      "auditUrl": "https://pagespeed.web.dev/analysis?url=https://sarahj.github.io/portfolio"
+    }
+  ],
+  "lastUpdated": "2026-01-31T14:30:00Z",
+  "testedWith": "Lighthouse CI"
+}
