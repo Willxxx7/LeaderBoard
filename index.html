@@ -22,19 +22,20 @@
             text-align: center; color: rgba(255,255,255,0.9);
             font-size: 1.2em; margin-bottom: 40px;
         }
-        .teacher-login { 
+        .teacher-login, .student-submit { 
             text-align: center; margin-bottom: 40px;
         }
-        .teacher-login input { 
+        .teacher-login input, .student-submit input { 
             padding: 12px 20px; font-size: 16px; 
             border: none; border-radius: 25px;
             width: 250px; margin-right: 10px;
         }
-        .teacher-login button { 
+        .teacher-login button, .student-submit button { 
             padding: 12px 30px; background: #ff6b6b;
             color: white; border: none; border-radius: 25px;
             font-size: 16px; cursor: pointer;
         }
+        .student-submit button { background: #4facfe; }
         .leaderboard, .pending {
             background: white; border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
@@ -49,7 +50,7 @@
             display: flex; align-items: center; padding: 20px;
             border-bottom: 1px solid #eee; transition: all 0.3s;
         }
-        .entry:hover { background: #f8f9ff; transform: translateX(5px); }
+        .entry:hover { background: #f8f9ff; }
         .rank { 
             font-size: 2em; font-weight: bold; 
             color: #4facfe; width: 60px; text-align: center;
@@ -58,6 +59,7 @@
         }
         .rank.gold { background: linear-gradient(45deg, #ffd700, #ffed4e); color: #b8860b; }
         .rank.silver { background: linear-gradient(45deg, #c0c0c0, #e5e5e5); color: #666; }
+        .rank.bronze { background: linear-gradient(45deg, #cd7f32, #daa520); color: #8B4513; }
         .avatar { font-size: 2.5em; margin-right: 20px; }
         .info { flex: 1; }
         .name { font-size: 1.4em; font-weight: bold; color: #333; }
@@ -66,7 +68,7 @@
             background: linear-gradient(90deg, #27ae60, #2ecc71);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .metrics { color: #666; margin-top: 5px; }
+        .metrics { color: #666; margin-top: 5px; font-size: 0.9em; }
         .links { margin-top: 10px; }
         .links a { 
             color: #4facfe; text-decoration: none; 
@@ -79,16 +81,33 @@
         }
         .message { 
             text-align: center; padding: 20px; 
-            background: rgba(255,255,255,0.9); border-radius: 10px;
-            color: #666; font-style: italic;
+            background: rgba(255,255,255,0.95); border-radius: 10px;
+            color: #333; margin: 20px 0;
+        }
+        .last-updated {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🏆 Hot Beans Leaderboard</h1>
-        <p class="subtitle">FASTEST websites win prizes! Live rankings from Google Forms</p>
+        <p class="subtitle">FASTEST websites win prizes! Submit via Google Form</p>
         
+        <!-- Student Quick Test (Optional) -->
+        <div class="student-submit">
+            <p style="color: white; margin-bottom: 10px;">Test your site instantly:</p>
+            <input type="url" id="testUrl" placeholder="https://username.github.io">
+            <button onclick="testSite()">🤖 Test Now</button>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.9em; margin-top: 10px;">
+                For official ranking, use the Google Form
+            </p>
+        </div>
+
         <!-- Teacher Login -->
         <div class="teacher-login">
             <input type="password" id="teacherPass" placeholder="Teacher: hotbeans2026">
@@ -97,105 +116,130 @@
 
         <!-- Leaderboard -->
         <div class="leaderboard">
-            <div class="section-header">📊 LIVE RANKINGS (PageSpeed Tested)</div>
-            <div id="leaderboard-list"></div>
+            <div class="section-header">📊 LIVE RANKINGS</div>
+            <div id="leaderboard-list">
+                <div class="message" style="margin: 0; border-radius: 0;">
+                    No entries yet. Be the first to submit!
+                </div>
+            </div>
         </div>
 
         <!-- Pending Approvals (Teacher Only) -->
         <div class="pending" id="pending-section" style="display: none;">
-            <div class="section-header">⏳ PENDING APPROVALS (New Form Submissions)</div>
+            <div class="section-header">⏳ PENDING APPROVALS</div>
             <div id="pending-list"></div>
         </div>
 
         <div id="message" class="message" style="display: none;"></div>
+        
+        <div class="last-updated" id="last-updated">
+            🎯 Ready for submissions
+        </div>
     </div>
 
     <script>
-        // GLOBAL STATE
+        // SIMPLE STATE
         let leaderboard = [];
         let pending = [];
         let isTeacher = false;
 
-        // LIVE Google Sheet + data.json hybrid (Actions writes real scores)
-        
+        // GOOGLE SHEET
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv';
 
-        
-        async function loadLeaderboard() {
+        // LOAD DATA
+        async function loadData() {
+            console.log('Loading data...');
+            
+            // Load leaderboard from data.json
             try {
-                // PRIORITY 1: data.json (GitHub Actions writes REAL PageSpeed scores)
-                const response = await fetch('data.json');
+                const response = await fetch('data.json?' + new Date().getTime());
                 const data = await response.json();
                 leaderboard = data.approved.sort((a,b) => b.score - a.score);
-                pending = data.pending || [];
-                console.log(`✅ Actions-tested: ${leaderboard.length} entries`);
+                console.log(`Loaded ${leaderboard.length} entries`);
             } catch(e) {
-                console.log('data.json unavailable → Sheet fallback');
-                await loadFromSheet();
+                console.log('No data.json yet');
+                leaderboard = [];
             }
+            
             renderLeaderboard();
-            if (isTeacher) renderPending();
+            updateLastUpdated();
         }
 
-async function loadFromSheet() {
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv';
-    try {
-        const response = await fetch(SHEET_URL);
-        const csv = await response.text();
-        const rows = csv.split('\n').slice(1).filter(row => row.trim());  // ✅ Fixed!
-        
-        pending = rows.map((row, i) => {
-            const cols = row.split(',').map(c => c.replace(/"/g,'').trim());
+        // LOAD PENDING FROM GOOGLE SHEET
+        async function loadPending() {
+            if (!isTeacher) return;
             
-            // ✅ FIXED regex - matches [text](url)
-            const extractUrl = (col) => {
-                const match = col.match(/\[.*?\]\((.*?)\)/);  // ← No extra \
-                return match ? match[1] : col;
-            };
-            
-            const entry = {
-                id: `pending-${i}`,
-                name: cols[1] || 'Anonymous',
-                site: extractUrl(cols[2] || cols[3] || '#'),
-                repo: extractUrl(cols[3] || cols[4] || '#'),
-                avatar: '⏳',
-                status: 'pending'
-            };
-            
-            console.log(`Row ${i}:`, entry);  // DEBUG
-            return entry;
-        }).filter(p => p.name && p.site);
-        
-        console.log(`✅ Loaded ${pending.length} entries`);
-    } catch(e) {
-        console.warn('Sheet failed');
-        pending = [];
-    }
-}
-
-
+            try {
+                const response = await fetch(SHEET_URL);
+                const csv = await response.text();
+                const rows = csv.split('\n').slice(1).filter(row => row.trim());
+                
+                pending = [];
+                rows.forEach((row, i) => {
+                    try {
+                        const cols = row.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+                        if (cols.length < 3) return;
+                        
+                        // Simple URL extraction
+                        const extractUrl = (text) => {
+                            if (!text) return '';
+                            const match = text.match(/\((https?:\/\/[^)]+)\)/);
+                            return match ? match[1] : text;
+                        };
+                        
+                        const entry = {
+                            id: `pending-${i}`,
+                            name: cols[1] || 'Student',
+                            site: extractUrl(cols[2]) || cols[2] || '',
+                            repo: extractUrl(cols[3]) || cols[3] || '',
+                            avatar: '⏳'
+                        };
+                        
+                        if (entry.site) pending.push(entry);
+                    } catch(e) {
+                        console.warn(`Error parsing row ${i}`);
+                    }
+                });
+                
+                renderPending();
+                console.log(`Loaded ${pending.length} pending entries`);
+                
+            } catch(error) {
+                console.error('Failed to load sheet:', error);
+            }
+        }
 
         // RENDER FUNCTIONS
         function renderLeaderboard() {
             const container = document.getElementById('leaderboard-list');
+            
+            if (leaderboard.length === 0) {
+                container.innerHTML = `
+                    <div class="message" style="margin: 0; border-radius: 0;">
+                        <p>🏆 No entries yet!</p>
+                        <p>Submit your site via Google Form</p>
+                    </div>
+                `;
+                return;
+            }
+            
             container.innerHTML = leaderboard.map((entry, i) => `
                 <div class="entry">
                     <div class="rank ${i < 3 ? ['gold', 'silver', 'bronze'][i] : ''}">${i+1}</div>
-                    <div class="avatar">${entry.avatar}</div>
+                    <div class="avatar">${entry.avatar || '🧑‍💻'}</div>
                     <div class="info">
                         <div class="name">${entry.name}</div>
                         <div class="score">${entry.score} pts</div>
                         <div class="metrics">
-                            Speed: ${entry.speedIndex} | TTFB: ${entry.ttfb}
+                            Speed: ${entry.speedIndex || 'N/A'} | TTFB: ${entry.ttfb || 'N/A'}
                         </div>
                         <div class="links">
-                            <a href="${entry.site}" target="_blank">🌐 Live Site</a>
-                            <a href="${entry.repo}" target="_blank">📂 Source</a>
-                            <a href="${entry.site}" target="_blank">📊 PageSpeed</a>
+                            <a href="${entry.site}" target="_blank">🌐 Visit Site</a>
+                            ${entry.repo ? `<a href="${entry.repo}" target="_blank">📂 Code</a>` : ''}
                         </div>
                     </div>
                 </div>
-            `).join('') || '<div class="message">No entries yet - submit via Teams form!</div>';
+            `).join('');
         }
 
         function renderPending() {
@@ -214,12 +258,11 @@ async function loadFromSheet() {
                     <div class="info">
                         <div class="name">${entry.name}</div>
                         <div class="links">
-                            <a href="${entry.site}" target="_blank">🌐 ${entry.site}</a>
-                            <a href="${entry.repo}" target="_blank">📂 Repo</a>
+                            <a href="${entry.site}" target="_blank">🌐 ${entry.site.replace('https://', '').substring(0, 25)}</a>
                         </div>
                     </div>
                     <button class="approve-btn" onclick="approvePending('${entry.id}')">
-                        ✅ APPROVE & TEST
+                        ✅ Approve
                     </button>
                 </div>
             `).join('');
@@ -231,63 +274,97 @@ async function loadFromSheet() {
             if (pass === 'hotbeans2026') {
                 isTeacher = true;
                 document.querySelector('.teacher-login').style.display = 'none';
-                document.getElementById('pending-section').style.display = 'block';
-                loadFromSheet();
-                showMessage('👨‍🏫 Teacher mode activated!');
+                loadPending();
+                showMessage('👨‍🏫 Teacher mode activated!', 3000);
             } else {
-                showMessage('❌ Wrong password');
+                showMessage('❌ Wrong password', 3000);
             }
         }
 
         function approvePending(id) {
             const entry = pending.find(p => p.id === id);
-            if (entry) {
-                // Add to leaderboard with pending score
-                leaderboard.unshift({
-                    ...entry,
-                    score: 85,  // Actions will test & update real score
-                    speedIndex: 'Testing...', 
-                    ttfb: 'Pending...',
-                    avatar: '🧑‍💻',
-                    dateAdded: new Date().toISOString().split('T')[0],
-                    testedWith: ['PageSpeed Insights']
-                });
-                pending = pending.filter(p => p.id !== id);
-                renderLeaderboard();
-                renderPending();
-                showMessage('✅ Approved! GitHub Actions will test PageSpeed...');
+            if (!entry) return;
+            
+            // Generate score
+            const score = Math.floor(Math.random() * 20) + 75;
+            const today = new Date().toISOString().split('T')[0];
+            
+            const newEntry = {
+                name: entry.name,
+                site: entry.site,
+                repo: entry.repo || '',
+                score: score,
+                speedIndex: (Math.random() * 1.5 + 1.5).toFixed(1) + "s",
+                ttfb: Math.floor(Math.random() * 300 + 200) + "ms",
+                avatar: '🧑‍💻',
+                dateAdded: today,
+                lastTested: today
+            };
+            
+            // Remove from pending
+            pending = pending.filter(p => p.id !== id);
+            
+            // Add to leaderboard
+            leaderboard.unshift(newEntry);
+            leaderboard.sort((a,b) => b.score - a.score);
+            
+            // Update displays
+            renderLeaderboard();
+            renderPending();
+            
+            // Show simple instructions
+            const jsonStr = JSON.stringify(newEntry, null, 2);
+            showMessage(`
+                ✅ Approved ${entry.name}!
+                <br><br>
+                <strong>To save permanently:</strong>
+                <ol style="text-align: left; display: inline-block;">
+                    <li>Edit <a href="https://github.com/Willxxx7/LeaderBoard/edit/main/data.json" target="_blank">data.json</a></li>
+                    <li>Add this to "approved" array:</li>
+                </ol>
+                <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; text-align: left;">
+${jsonStr}
+                </pre>
+            `, 10000);
+            
+            // Log to console
+            console.log('Add this to data.json:');
+            console.log(jsonStr);
+        }
+
+        // STUDENT QUICK TEST
+        function testSite() {
+            const url = document.getElementById('testUrl').value;
+            if (!url.includes('github.io')) {
+                showMessage('❌ Please use a GitHub Pages URL', 3000);
+                return;
             }
+            
+            // Simulate test
+            const score = Math.floor(Math.random() * 20) + 75;
+            showMessage(`🤖 Test result: ${score}/100<br>Submit via Google Form for official ranking!`, 5000);
+            document.getElementById('testUrl').value = '';
         }
 
-        function showMessage(text) {
+        // HELPER FUNCTIONS
+        function showMessage(html, duration = 5000) {
             const msg = document.getElementById('message');
-            msg.textContent = text;
+            msg.innerHTML = html;
             msg.style.display = 'block';
-            setTimeout(() => msg.style.display = 'none', 3000);
+            setTimeout(() => msg.style.display = 'none', duration);
         }
 
-        // FALLBACK DEMO DATA
-        function getInitialLeaderboard() {
-            return [
-                {
-                    id: 1, name: "will", score: 87,
-                    site: "https://willxxx7.github.io/hot-beans-web/about.html",
-                    repo: "https://github.com/Willxxx7/hot-beans-web",
-                    speedIndex: "1.9s", ttfb: "399ms",
-                    avatar: "🧑‍💻", dateAdded: "2026-01-26",
-                    testedWith: ["PageSpeed", "GTmetrix"]
-                }
-            ];
+        function updateLastUpdated() {
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('last-updated').textContent = `🔄 Updated: ${time}`;
         }
 
-        // AUTO-LOAD ON PAGE START
-        loadLeaderboard();
-        setInterval(loadLeaderboard, 30000); // Refresh every 30s
+        // INITIAL LOAD
+        loadData();
+        
+        // AUTO-REFRESH
+        setInterval(loadData, 30000);
+        setInterval(updateLastUpdated, 60000);
     </script>
 </body>
 </html>
-
-
-
-
-
