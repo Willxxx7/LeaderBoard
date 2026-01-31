@@ -264,7 +264,7 @@
 
         <!-- Teacher Login -->
         <div class="teacher-login">
-            <input type="password" id="teacherPass" placeholder="Teacher: hotbeans2026">
+            <input type="password" id="teacherPass" placeholder="Teacher: ">
             <button onclick="checkTeacher()">Login</button>
         </div>
 
@@ -921,7 +921,7 @@ function addSystemStatusBanner() {
         // ========== TEACHER FUNCTIONS ==========
         function checkTeacher() {
             const pass = document.getElementById('teacherPass').value;
-            if (pass === 'hotbeans2026') {
+            if (pass === 'hotbeans2026###') {
                 isTeacher = true;
                 document.querySelector('.teacher-login').style.display = 'none';
                 document.getElementById('pending-section').style.display = 'block';
@@ -1148,4 +1148,5 @@ setTimeout(() => {
     </script>
 </body>
 </html>
+
 
