@@ -1,18 +1,6 @@
 {
   "approved": [
-    {
-      "name": "bbc",
-      "site": "https://www.bbc.co.uk/",
-      "repo": "",
-      "score": 91,
-      "speedIndex": "1.8s",
-      "ttfb": "414ms",
-      "avatar": "🧑‍💻",
-      "dateAdded": "2026-01-31",
-      "lastTested": "2026-01-31",
-      "lastUpdated": "2026-01-31",
-      "version": 1
-    },
+    
     {
       "name": "Wills site (v2)",
       "site": "https://willxxx7.github.io/hot-beans-web",
