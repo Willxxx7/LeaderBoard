@@ -1,25 +1,108 @@
-{
-  "approved": [
-    {
-      "name": "Sarah Johnson",
-      "site": "https://sarahj.github.io/portfolio",
-      "repo": "https://github.com/sarahj/portfolio",
-      "score": 92,
-      "accessibility": 88,
-      "bestPractices": 95,
-      "seo": 90,
-      "speedIndex": "2.1s",
-      "firstContentfulPaint": "1.2s",
-      "largestContentfulPaint": "2.8s",
-      "cumulativeLayoutShift": "0.12",
-      "totalBlockingTime": "120ms",
-      "avatar": "👩‍💻",
-      "dateAdded": "2026-01-31",
-      "lastTested": "2026-01-31T14:30:00Z",
-      "testedWith": ["Lighthouse v10.0.0"],
-      "auditUrl": "https://pagespeed.web.dev/analysis?url=https://sarahj.github.io/portfolio"
-    }
-  ],
-  "lastUpdated": "2026-01-31T14:30:00Z",
-  "testedWith": "Lighthouse CI"
-}
+name: 🎯 Lighthouse Testing
+on:
+  workflow_dispatch: true  # Manual trigger
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: ⚡ Checkout code (GETS data.json FROM YOUR REPO)
+        uses: actions/checkout@v4
+        
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: 📦 Install Lighthouse
+        run: npm install lighthouse puppeteer
+          
+      - name: 🎯 Load and test student sites
+        run: |
+          echo "📂 Loading data.json from repository..."
+          
+          # CREATE TEST SCRIPT
+          cat > lighthouse-test.js << 'EOF'
+          const fs = require('fs');
+          const lighthouse = require('lighthouse');
+          const puppeteer = require('puppeteer');
+          
+          console.log('🚀 Starting Lighthouse testing...');
+          
+          // 1. LOAD YOUR EXISTING data.json
+          const rawData = fs.readFileSync('data.json', 'utf8');
+          const data = JSON.parse(rawData);
+          
+          console.log(\`📊 Found \${data.approved?.length || 0} students to test\`);
+          
+          // 2. TEST EACH STUDENT'S SITE URL
+          async function testAllSites() {
+            const browser = await puppeteer.launch({
+              args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+            
+            for (const student of data.approved || []) {
+              const url = student.site;
+              
+              if (!url || !url.startsWith('http')) {
+                console.log(\`⏭️  Skipping \${student.name}: Invalid URL\`);
+                continue;
+              }
+              
+              console.log(\`🔍 Testing \${student.name} - \${url}\`);
+              
+              try {
+                // 3. RUN LIGHTHOUSE ON STUDENT'S SITE
+                const result = await lighthouse(url, {
+                  port: (new URL(browser.wsEndpoint())).port,
+                  output: 'json',
+                  onlyCategories: ['performance'],
+                  throttlingMethod: 'simulate'
+                });
+                
+                const perfScore = Math.round(result.lhr.categories.performance.score * 100);
+                
+                // 4. UPDATE STUDENT'S SCORE IN data.json
+                student.previousScore = student.score;
+                student.score = perfScore;
+                student.speedIndex = result.lhr.audits['speed-index']?.displayValue || 'N/A';
+                student.firstContentfulPaint = result.lhr.audits['first-contentful-paint']?.displayValue || 'N/A';
+                student.lastTested = new Date().toISOString();
+                student.testedWith = ['Lighthouse'];
+                
+                console.log(\`✅ \${student.name}: \${perfScore}/100\`);
+                
+              } catch (error) {
+                console.log(\`❌ Failed \${student.name}: \${error.message}\`);
+                student.lastTested = new Date().toISOString();
+                student.testError = error.message;
+              }
+              
+              // Wait 2 seconds between tests
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+            await browser.close();
+            
+            // 5. SAVE UPDATED data.json BACK TO REPO
+            data.lastUpdated = new Date().toISOString();
+            data.testedWith = 'Lighthouse';
+            
+            fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
+            console.log(\`🎉 Updated data.json with Lighthouse results!\`);
+          }
+          
+          testAllSites().catch(console.error);
+          EOF
+          
+          # RUN THE SCRIPT
+          node lighthouse-test.js
+          
+      - name: 📝 Commit updated data.json
+        run: |
+          git config user.name "Lighthouse Bot"
+          git config user.email "lighthouse@github.com"
+          git add data.json
+          git commit -m "🎯 Lighthouse test results" || echo "No changes"
+          git push
