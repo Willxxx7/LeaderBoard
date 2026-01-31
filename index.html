@@ -338,40 +338,260 @@
         let hasUnsavedChanges = false;
         let autoSaveEnabled = false;
 
-        // ========== INITIAL LOAD ==========
-        async function loadData() {
-            console.log('Loading data...');
-            
-            // Load from GitHub data.json (what students see)
-            if (!hasLoadedFromJson) {
-                try {
-                    const response = await fetch('data.json?' + new Date().getTime());
-                    const data = await response.json();
-                    leaderboard = data.approved.sort((a,b) => b.score - a.score);
-                    console.log(`Loaded ${leaderboard.length} entries from GitHub`);
-                    hasLoadedFromJson = true;
-                    updateDataSourceBadge('github');
-                } catch(e) {
-                    console.log('No data.json on GitHub yet');
-                    leaderboard = [];
-                    hasLoadedFromJson = true;
-                    updateDataSourceBadge('none');
-                }
-            }
-            
-            // Load saved data from localStorage (teacher's working copy)
-            loadFromLocalStorage();
-            
-            // Refresh pending if teacher
-            if (isTeacher) {
-                await loadPending();
-                updateSaveStatus();
-            }
-            
-            renderLeaderboard();
-            updateLastUpdated();
-        }
+      // ========== INITIAL LOAD ==========
+async function loadData() {
+    console.log('Loading data...');
+    
+    // Load from GitHub data.json (what students see)
+    await loadFromGitHub();
+    
+    // Load saved data from localStorage (teacher's working copy)
+    loadFromLocalStorage();
+    
+    // Refresh pending if teacher
+    if (isTeacher) {
+        await loadPending();  // This loads from Google Sheet CSV
+        updateTeacherControls();
+        updateManagementPanel();
+    }
+    
+    renderLeaderboard();
+    updateLastUpdated();
+    
+    // Update sync status every minute if teacher
+    if (isTeacher) {
+        setInterval(updateSyncStatus, 60000);
+    }
+}
 
+        // ========== NEW: LOAD FROM GITHUB data.json ==========
+async function loadFromGitHub() {
+    try {
+        const response = await fetch('data.json?' + new Date().getTime());
+        const data = await response.json();
+        
+        // For students: always use GitHub data
+        if (!isTeacher && data.approved) {
+            leaderboard = data.approved.sort((a,b) => (b.score || 0) - (a.score || 0));
+            hasLoadedFromJson = true;
+            updateDataSourceBadge('github');
+        }
+        
+        // For teachers: load pending from data.json
+        if (isTeacher && data.pending) {
+            // Convert pending format to match your HTML
+            data.pending.forEach(pendingStudent => {
+                if (!pending.find(p => p.name === pendingStudent.name)) {
+                    const existing = leaderboard.find(s => 
+                        s.name.toLowerCase().includes(pendingStudent.name.toLowerCase())
+                    );
+                    
+                    pending.push({
+                        id: pendingStudent.id,
+                        name: pendingStudent.name,
+                        site: pendingStudent.site,
+                        repo: `https://github.com/${pendingStudent.github}`,
+                        avatar: '⏳',
+                        isUpdate: !!existing,
+                        existingVersion: existing ? (existing.version || 1) : 0
+                    });
+                }
+            });
+            renderPending();
+        }
+        
+        console.log(`Loaded ${data.approved?.length || 0} students from GitHub`);
+        
+    } catch (error) {
+        console.log('Could not load from GitHub:', error);
+        updateDataSourceBadge('local');
+    }
+}
+
+// ========== NEW: TEACHER SYNC CONTROLS ==========
+function updateTeacherControls() {
+    const panel = document.getElementById('management-panel');
+    if (!panel || !isTeacher) return;
+    
+    // Add sync controls if not already there
+    const existingSync = document.getElementById('sync-controls');
+    if (!existingSync) {
+        const syncDiv = document.createElement('div');
+        syncDiv.id = 'sync-controls';
+        syncDiv.style.marginTop = '20px';
+        syncDiv.style.paddingTop = '15px';
+        syncDiv.style.borderTop = '2px solid #f8f9fa';
+        
+        syncDiv.innerHTML = `
+            <h4>🔄 Google Form Sync</h4>
+            <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                <button class="github-btn" onclick="runAutoProcess()">
+                    🤖 Run Auto-Process
+                </button>
+                <button class="copy-btn" onclick="viewPendingStudents()">
+                    📋 View Pending
+                </button>
+                <a href="https://forms.gle/eQmcwZo1AjXVNM7DA" target="_blank" class="github-btn" style="text-decoration: none;">
+                    📝 View Google Form
+                </a>
+                <a href="https://github.com/Willxxx7/LeaderBoard/actions" target="_blank" class="copy-btn" style="text-decoration: none;">
+                    📊 View Actions
+                </a>
+            </div>
+            <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                <strong>Auto-sync:</strong> Runs every 5 minutes<br>
+                <strong>Process:</strong> Form → GitHub → Teacher approval → Publish
+            </p>
+            <div id="sync-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em;">
+                Loading sync status...
+            </div>
+        `;
+        
+        panel.appendChild(syncDiv);
+        updateSyncStatus();
+    }
+}
+
+// ========== NEW: RUN AUTO-PROCESS ==========
+function runAutoProcess() {
+    showMessage(`
+        <h3>🤖 Triggering Auto-Process</h3>
+        <p>This will:</p>
+        <ol style="text-align: left; display: inline-block;">
+            <li>Check Google Form for new submissions</li>
+            <li>Add new students to pending</li>
+            <li>Test approved sites with PageSpeed API</li>
+            <li>Update scores automatically</li>
+        </ol>
+        <br>
+        <button class="github-btn" onclick="
+            window.open('https://github.com/Willxxx7/LeaderBoard/actions/workflows/auto-process.yml', '_blank');
+            showMessage('Opening GitHub Actions...', 3000);
+        ">
+            🚀 Open GitHub Actions
+        </button>
+        <button class="copy-btn" onclick="
+            // Simulate a run for demo
+            showMessage('🎬 Demo: Auto-process would run now!<br>In production, it runs every 5 minutes.', 5000);
+        ">
+            🎬 Demo Run
+        </button>
+        <button class="copy-btn" onclick="showMessage('', 0)">
+            ❌ Cancel
+        </button>
+    `, 0);
+}
+
+// ========== NEW: VIEW PENDING STUDENTS ==========
+function viewPendingStudents() {
+    fetch('data.json?' + new Date().getTime())
+        .then(r => r.json())
+        .then(data => {
+            const pending = data.pending || [];
+            
+            let html = `<h3>⏳ Pending Students from Google Form</h3>`;
+            
+            if (pending.length === 0) {
+                html += `<p>No pending students. New submissions appear here within 5 minutes.</p>`;
+            } else {
+                html += `<p><strong>${pending.length} students waiting for approval</strong></p>`;
+                html += `<div style="max-height: 300px; overflow-y: auto;">`;
+                
+                pending.forEach(p => {
+                    html += `
+                        <div style="padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                            <strong>${p.name}</strong><br>
+                            <small>Site: ${p.site}</small><br>
+                            <small>GitHub: ${p.github || 'Not provided'}</small><br>
+                            <small>Submitted: ${new Date(p.timestamp).toLocaleDateString()}</small>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+            }
+            
+            html += `
+                <br>
+                <button class="approve-btn" onclick="location.reload()">
+                    🔄 Refresh Page
+                </button>
+                <button class="copy-btn" onclick="showMessage('', 0)">
+                    ❌ Close
+                </button>
+            `;
+            
+            showMessage(html, 0);
+        })
+        .catch(() => {
+            showMessage('❌ Could not load pending students', 3000);
+        });
+}
+
+// ========== NEW: UPDATE SYNC STATUS ==========
+function updateSyncStatus() {
+    const statusEl = document.getElementById('sync-status');
+    if (!statusEl) return;
+    
+    fetch('data.json?' + new Date().getTime())
+        .then(r => r.json())
+        .then(data => {
+            const lastChecked = data.lastChecked ? new Date(data.lastChecked).toLocaleString() : 'Never';
+            const lastTested = data.lastTested ? new Date(data.lastTested).toLocaleString() : 'Never';
+            
+            statusEl.innerHTML = `
+                <strong>📊 System Status:</strong><br>
+                ✅ Approved: ${data.approved?.length || 0} students<br>
+                ⏳ Pending: ${data.pending?.length || 0} approvals<br>
+                🕐 Last checked: ${lastChecked}<br>
+                🧪 Last tested: ${lastTested}
+            `;
+        })
+        .catch(() => {
+            statusEl.innerHTML = '❌ Could not load system status';
+        });
+}
+
+// ========== NEW: ADD SYSTEM STATUS BANNER ==========
+function addSystemStatusBanner() {
+    const banner = document.createElement('div');
+    banner.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+    banner.style.color = 'white';
+    banner.style.padding = '15px';
+    banner.style.borderRadius = '10px';
+    banner.style.margin = '20px 0';
+    banner.style.textAlign = 'center';
+    banner.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+    
+    banner.innerHTML = `
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: bold;">🏆</div>
+                <div>Hot Beans 2026</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: bold;">✅</div>
+                <div>Google Form Active</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: bold;">🤖</div>
+                <div>Auto-Process Active</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: bold;">⚡</div>
+                <div>PageSpeed API Active</div>
+            </div>
+        </div>
+        <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.9;">
+            Students submit via form → Auto-process every 5 min → Teacher approval → Live leaderboard
+        </div>
+    `;
+    
+    // Insert after the subtitle
+    const subtitle = document.querySelector('.subtitle');
+    subtitle.parentNode.insertBefore(banner, subtitle.nextSibling);
+}
+        
         // ========== LOAD PENDING ==========
         async function loadPending() {
             try {
@@ -712,10 +932,12 @@
                 document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
                 document.getElementById('auto-save-toggle').onclick = toggleAutoSave;
                 
-                loadPending();
-                updateManagementPanel();
-                renderLeaderboard();
-                showMessage('👨‍🏫 Teacher mode activated!', 3000);
+                       loadPending();
+        updateManagementPanel();
+        updateTeacherControls();  // ← ADD THIS LINE
+        updateSyncStatus();       // ← ADD THIS LINE
+        renderLeaderboard();
+        showMessage('👨‍🏫 Teacher mode activated!', 3000);
             } else {
                 showMessage('❌ Wrong password', 3000);
             }
@@ -905,6 +1127,25 @@
         }, 30000);
         
         setInterval(updateLastUpdated, 60000);
+
+        // ========== INITIALIZE NEW FEATURES ==========
+// Add system status banner
+addSystemStatusBanner();
+
+// Check for PageSpeed API key status
+setTimeout(() => {
+    fetch('data.json?' + new Date().getTime())
+        .then(r => r.json())
+        .then(data => {
+            if (data.approved && data.approved.some(s => s.score > 0 && !s.isDemo)) {
+                console.log('✅ PageSpeed API is working!');
+            }
+        })
+        .catch(() => {
+            console.log('⚠️  data.json not found or error loading');
+        });
+}, 1000);
     </script>
 </body>
 </html>
+
