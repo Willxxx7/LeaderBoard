@@ -248,6 +248,70 @@
     </style>
 </head>
 <body>
+    <!-- Simple Login -->
+<div id="loginScreen" style="
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+">
+    <div style="
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    ">
+        <h1 style="color: #333; margin-bottom: 30px;">🔒 Teacher Access</h1>
+        
+        <div style="margin-bottom: 20px;">
+            <input type="password" id="accessCode" placeholder="Access Code" style="
+                width: 100%;
+                padding: 15px;
+                border: 2px solid #4facfe;
+                border-radius: 10px;
+                font-size: 16px;
+                margin-bottom: 15px;
+            ">
+            
+            <button onclick="verifyAccess()" style="
+                width: 100%;
+                padding: 15px;
+                background: #4facfe;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                cursor: pointer;
+            ">
+                Enter Site
+            </button>
+        </div>
+        
+        <div style="
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        ">
+            <p style="margin: 0; color: #666; font-size: 0.9em;">
+                <strong>For Students:</strong> Ask teacher for access code
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content (Hidden Initially) -->
+<div id="mainContent" style="display: none;">
+    <!-- Your existing container content here -->
+    <div class="container">
+        ... your existing leaderboard HTML ...
+    </div>
+</div>
     <div class="container">
         <h1>🏆 Hot Beans Leaderboard</h1>
         <p class="subtitle">FASTEST websites win prizes! Submit via Google Form</p>
@@ -325,6 +389,45 @@
     </div>
 
     <script>
+        // ========== ACCESS CONTROL ==========
+// Set your access code here
+const ACCESS_CODE = 'HotBeans2026###'; // CHANGE THIS!
+
+function verifyAccess() {
+    const code = document.getElementById('accessCode').value;
+    
+    if (code === ACCESS_CODE) {
+        // Show main content
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        
+        // Store in session storage
+        sessionStorage.setItem('hasAccess', 'true');
+        
+        // Show success message
+        showMessage('✅ Access granted! Loading leaderboard...', 2000);
+    } else {
+        alert('❌ Incorrect access code');
+        document.getElementById('accessCode').value = '';
+        document.getElementById('accessCode').focus();
+    }
+}
+
+// Check if already has access
+if (sessionStorage.getItem('hasAccess') === 'true') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+} else {
+    // Show login screen
+    document.getElementById('loginScreen').style.display = 'block';
+}
+
+// Allow Enter key
+document.getElementById('accessCode')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        verifyAccess();
+    }
+});
         // ========== CONFIGURATION ==========
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv';
         const GITHUB_REPO = 'Willxxx7/LeaderBoard';
@@ -1196,6 +1299,7 @@ document.addEventListener('keydown', function(e) {
     </script>
 </body>
 </html>
+
 
 
 
