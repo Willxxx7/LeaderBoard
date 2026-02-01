@@ -263,10 +263,10 @@
         </div>
 
         <!-- Teacher Login -->
-        <div class="teacher-login">
-            <input type="password" id="teacherPass" placeholder="Teacher: ">
-            <button onclick="checkTeacher()">Login</button>
-        </div>
+      <div class="teacher-login" style="display:none">
+    <input type="password" id="teacherPass" placeholder="Teacher: ">
+    <button onclick="checkTeacher()">Login</button>
+</div>
 
         <!-- Management Panel (Teacher Only) -->
         <div id="management-panel" class="management-panel" style="display: none;">
@@ -919,29 +919,63 @@ function addSystemStatusBanner() {
         }
 
         // ========== TEACHER FUNCTIONS ==========
-        function checkTeacher() {
-            const pass = document.getElementById('teacherPass').value;
-            if (pass === 'hotbeans2026###') {
-                isTeacher = true;
-                document.querySelector('.teacher-login').style.display = 'none';
-                document.getElementById('pending-section').style.display = 'block';
-                document.getElementById('management-panel').style.display = 'block';
-                
-                // Load auto-save preference
-                autoSaveEnabled = localStorage.getItem('hotbeans-autosave') === 'true';
-                document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
-                document.getElementById('auto-save-toggle').onclick = toggleAutoSave;
-                
-                       loadPending();
-        updateManagementPanel();
-        updateTeacherControls();  // ← ADD THIS LINE
-        updateSyncStatus();       // ← ADD THIS LINE
-        renderLeaderboard();
-        showMessage('👨‍🏫 Teacher mode activated!', 3000);
-            } else {
-                showMessage('❌ Wrong password', 3000);
-            }
+       // ========== HIDDEN TEACHER ACCESS ==========
+function checkTeacher() {
+    // This is now hidden - checks URL or localStorage first
+    const url = new URL(window.location.href);
+    
+    // Option 1: Check URL hash (#teacher)
+    if (url.hash === '#teacher') {
+        const pass = prompt('Teacher password:');
+        if (pass === 'YourNewPassword123') {
+            enableTeacherMode();
+            return;
         }
+    }
+    
+    // Option 2: Check for visible form (if you keep it hidden)
+    const pass = document.getElementById('teacherPass')?.value;
+    if (pass && pass === 'YourNewPassword123') {
+        enableTeacherMode();
+    } else if (pass) {
+        showMessage('❌ Wrong password', 3000);
+    }
+}
+
+// Called by both methods above
+function enableTeacherMode() {
+    isTeacher = true;
+    
+    // Show teacher panels
+    document.getElementById('management-panel').style.display = 'block';
+    document.getElementById('pending-section').style.display = 'block';
+    
+    // Load auto-save preference
+    autoSaveEnabled = localStorage.getItem('hotbeans-autosave') === 'true';
+    if (document.getElementById('auto-save-toggle')) {
+        document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
+        document.getElementById('auto-save-toggle').onclick = toggleAutoSave;
+    }
+    
+    // Load teacher data
+    loadPending();
+    updateManagementPanel();
+    updateTeacherControls();
+    updateSyncStatus();
+    renderLeaderboard();
+    
+    showMessage('👨‍🏫 Teacher mode activated!', 3000);
+}
+
+// Optional: Add keyboard shortcut too
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'T') {
+        const pass = prompt('Teacher password:');
+        if (pass === 'YourNewPassword123') {
+            enableTeacherMode();
+        }
+    }
+});
 
         function updateStudentScore(studentName) {
             if (!isTeacher) return;
@@ -1162,6 +1196,7 @@ document.addEventListener('keydown', function(e) {
     </script>
 </body>
 </html>
+
 
 
 
