@@ -617,140 +617,8 @@
     </div>
 
     <script>
-        // Your existing JavaScript code remains the same...
-        // Just copy all your JavaScript code from the previous version
-        // I'll include the key parts that need to be updated:
-
-        // ========== ACCESS CONTROL ==========
-        const ACCESS_CODE = 'HotBeans2026###';
-
-        function verifyAccess() {
-            const code = document.getElementById('accessCode').value;
-            
-            if (code === ACCESS_CODE) {
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                sessionStorage.setItem('hasAccess', 'true');
-                showMessage('✅ Access granted! Loading leaderboard...', 2000);
-                loadData(); // Initialize after login
-            } else {
-                alert('❌ Incorrect access code');
-                document.getElementById('accessCode').value = '';
-                document.getElementById('accessCode').focus();
-            }
-        }
-
-        // Check if already has access
-        if (sessionStorage.getItem('hasAccess') === 'true') {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-            // Initialize after a short delay to ensure DOM is ready
-            setTimeout(() => {
-                loadData();
-            }, 100);
-        }
-
-        // Allow Enter key
-        document.getElementById('accessCode')?.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                verifyAccess();
-            }
-        });
-
-        // ========== TEACHER MODE ==========
-        // Add keyboard shortcut for teacher mode
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'T') {
-                const pass = prompt('Teacher password:');
-                if (pass === 'HotBeans2026###') {
-                    enableTeacherMode();
-                }
-            }
-        });
-
-        function enableTeacherMode() {
-            isTeacher = true;
-            
-            // Show teacher panels
-            document.getElementById('management-panel').style.display = 'block';
-            document.getElementById('pending-section').style.display = 'block';
-            document.getElementById('sync-controls').style.display = 'block';
-            
-            // Load auto-save preference
-            autoSaveEnabled = localStorage.getItem('hotbeans-autosave') === 'true';
-            if (document.getElementById('auto-save-toggle')) {
-                document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
-                document.getElementById('auto-save-toggle').onclick = toggleAutoSave;
-            }
-            
-            // Load teacher data
-            loadPending();
-            updateManagementPanel();
-            updateSyncStatus();
-            renderLeaderboard();
-            
-            showMessage('👨‍🏫 Teacher mode activated!', 3000);
-        }
-
-        // ========== INITIALIZE ==========
-        // Add initialization call
-        window.addEventListener('DOMContentLoaded', function() {
-            // If already logged in, initialize
-            if (sessionStorage.getItem('hasAccess') === 'true') {
-                // Check if we need to enable teacher mode
-                if (localStorage.getItem('hotbeans-teacher') === 'true') {
-                    enableTeacherMode();
-                }
-            }
-        });
-
-        // ... rest of your JavaScript code remains exactly the same ...
-        // Just make sure to include all your existing functions
-    </script>
-    <script>
-        // Paste all your existing JavaScript functions here
-        // They remain exactly the same as in your original code
-        // I've just fixed the CSS and HTML structure above
-       // ========== ACCESS CONTROL ==========
-// Set your access code here
-const ACCESS_CODE = 'HotBeans2026###'; // CHANGE THIS!
-
-function verifyAccess() {
-    const code = document.getElementById('accessCode').value;
-    
-    if (code === ACCESS_CODE) {
-        // Show main content
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'block';
-        
-        // Store in session storage
-        sessionStorage.setItem('hasAccess', 'true');
-        
-        // Show success message
-        showMessage('✅ Access granted! Loading leaderboard...', 2000);
-    } else {
-        alert('❌ Incorrect access code');
-        document.getElementById('accessCode').value = '';
-        document.getElementById('accessCode').focus();
-    }
-}
-
-// Check if already has access
-if (sessionStorage.getItem('hasAccess') === 'true') {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-} else {
-    // Show login screen
-    document.getElementById('loginScreen').style.display = 'block';
-}
-
-// Allow Enter key
-document.getElementById('accessCode')?.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        verifyAccess();
-    }
-});
         // ========== CONFIGURATION ==========
+        const ACCESS_CODE = 'HotBeans2026###';
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDqA-VHJq4Dj7ySNqXMtlfS4z8tSeFuBROb-mL4v72dbLzzR3_1nTg0xlg87UcnQ3HHIr7Ye13jBZ_/pub?gid=1937888403&single=true&output=csv';
         const GITHUB_REPO = 'Willxxx7/LeaderBoard';
         const GITHUB_FILE = 'data.json';
@@ -763,260 +631,124 @@ document.getElementById('accessCode')?.addEventListener('keypress', function(e) 
         let hasUnsavedChanges = false;
         let autoSaveEnabled = false;
 
-      // ========== INITIAL LOAD ==========
-async function loadData() {
-    console.log('Loading data...');
-    
-    // Load from GitHub data.json (what students see)
-    await loadFromGitHub();
-    
-    // Load saved data from localStorage (teacher's working copy)
-    loadFromLocalStorage();
-    
-    // Refresh pending if teacher
-    if (isTeacher) {
-        await loadPending();  // This loads from Google Sheet CSV
-        updateTeacherControls();
-        updateManagementPanel();
-    }
-    
-    renderLeaderboard();
-    updateLastUpdated();
-    
-    // Update sync status every minute if teacher
-    if (isTeacher) {
-        setInterval(updateSyncStatus, 60000);
-    }
-}
-
-        // ========== NEW: LOAD FROM GITHUB data.json ==========
-async function loadFromGitHub() {
-    try {
-        const response = await fetch('data.json?' + new Date().getTime());
-        const data = await response.json();
-        
-        // For students: always use GitHub data
-        if (!isTeacher && data.approved) {
-            leaderboard = data.approved.sort((a,b) => (b.score || 0) - (a.score || 0));
-            hasLoadedFromJson = true;
-            updateDataSourceBadge('github');
-        }
-        
-        // For teachers: load pending from data.json
-        if (isTeacher && data.pending) {
-            // Convert pending format to match your HTML
-            data.pending.forEach(pendingStudent => {
-                if (!pending.find(p => p.name === pendingStudent.name)) {
-                    const existing = leaderboard.find(s => 
-                        s.name.toLowerCase().includes(pendingStudent.name.toLowerCase())
-                    );
-                    
-                    pending.push({
-                        id: pendingStudent.id,
-                        name: pendingStudent.name,
-                        site: pendingStudent.site,
-                        repo: `https://github.com/${pendingStudent.github}`,
-                        avatar: '⏳',
-                        isUpdate: !!existing,
-                        existingVersion: existing ? (existing.version || 1) : 0
-                    });
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if already has access
+            if (sessionStorage.getItem('hasAccess') === 'true') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                loadData();
+                
+                // Check if teacher mode was enabled
+                if (localStorage.getItem('hotbeans-teacher') === 'true') {
+                    enableTeacherMode();
                 }
-            });
-            renderPending();
-        }
-        
-        console.log(`Loaded ${data.approved?.length || 0} students from GitHub`);
-        
-    } catch (error) {
-        console.log('Could not load from GitHub:', error);
-        updateDataSourceBadge('local');
-    }
-}
-
-// ========== NEW: TEACHER SYNC CONTROLS ==========
-function updateTeacherControls() {
-    const panel = document.getElementById('management-panel');
-    if (!panel || !isTeacher) return;
-    
-    // Add sync controls if not already there
-    const existingSync = document.getElementById('sync-controls');
-    if (!existingSync) {
-        const syncDiv = document.createElement('div');
-        syncDiv.id = 'sync-controls';
-        syncDiv.style.marginTop = '20px';
-        syncDiv.style.paddingTop = '15px';
-        syncDiv.style.borderTop = '2px solid #f8f9fa';
-        
-        syncDiv.innerHTML = `
-            <h4>🔄 Google Form Sync</h4>
-            <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
-                <button class="github-btn" onclick="runAutoProcess()">
-                    🤖 Run Auto-Process
-                </button>
-                <button class="copy-btn" onclick="viewPendingStudents()">
-                    📋 View Pending
-                </button>
-                <a href="https://forms.gle/eQmcwZo1AjXVNM7DA" target="_blank" class="github-btn" style="text-decoration: none;">
-                    📝 View Google Form
-                </a>
-                <a href="https://github.com/Willxxx7/LeaderBoard/actions" target="_blank" class="copy-btn" style="text-decoration: none;">
-                    📊 View Actions
-                </a>
-            </div>
-            <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
-                <strong>Auto-sync:</strong> Runs every 5 minutes<br>
-                <strong>Process:</strong> Form → GitHub → Teacher approval → Publish
-            </p>
-            <div id="sync-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em;">
-                Loading sync status...
-            </div>
-        `;
-        
-        panel.appendChild(syncDiv);
-        updateSyncStatus();
-    }
-}
-
-// ========== NEW: RUN AUTO-PROCESS ==========
-function runAutoProcess() {
-    showMessage(`
-        <h3>🤖 Triggering Auto-Process</h3>
-        <p>This will:</p>
-        <ol style="text-align: left; display: inline-block;">
-            <li>Check Google Form for new submissions</li>
-            <li>Add new students to pending</li>
-            <li>Test approved sites with PageSpeed API</li>
-            <li>Update scores automatically</li>
-        </ol>
-        <br>
-        <button class="github-btn" onclick="
-            window.open('https://github.com/Willxxx7/LeaderBoard/actions/workflows/auto-process.yml', '_blank');
-            showMessage('Opening GitHub Actions...', 3000);
-        ">
-            🚀 Open GitHub Actions
-        </button>
-        <button class="copy-btn" onclick="
-            // Simulate a run for demo
-            showMessage('🎬 Demo: Auto-process would run now!<br>In production, it runs every 5 minutes.', 5000);
-        ">
-            🎬 Demo Run
-        </button>
-        <button class="copy-btn" onclick="showMessage('', 0)">
-            ❌ Cancel
-        </button>
-    `, 0);
-}
-
-// ========== NEW: VIEW PENDING STUDENTS ==========
-function viewPendingStudents() {
-    fetch('data.json?' + new Date().getTime())
-        .then(r => r.json())
-        .then(data => {
-            const pending = data.pending || [];
-            
-            let html = `<h3>⏳ Pending Students from Google Form</h3>`;
-            
-            if (pending.length === 0) {
-                html += `<p>No pending students. New submissions appear here within 5 minutes.</p>`;
-            } else {
-                html += `<p><strong>${pending.length} students waiting for approval</strong></p>`;
-                html += `<div style="max-height: 300px; overflow-y: auto;">`;
-                
-                pending.forEach(p => {
-                    html += `
-                        <div style="padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
-                            <strong>${p.name}</strong><br>
-                            <small>Site: ${p.site}</small><br>
-                            <small>GitHub: ${p.github || 'Not provided'}</small><br>
-                            <small>Submitted: ${new Date(p.timestamp).toLocaleDateString()}</small>
-                        </div>
-                    `;
-                });
-                
-                html += `</div>`;
             }
             
-            html += `
-                <br>
-                <button class="approve-btn" onclick="location.reload()">
-                    🔄 Refresh Page
-                </button>
-                <button class="copy-btn" onclick="showMessage('', 0)">
-                    ❌ Close
-                </button>
-            `;
-            
-            showMessage(html, 0);
-        })
-        .catch(() => {
-            showMessage('❌ Could not load pending students', 3000);
+            // Add keyboard shortcut for teacher mode
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'T') {
+                    const pass = prompt('Teacher password:');
+                    if (pass === ACCESS_CODE) {
+                        enableTeacherMode();
+                    }
+                }
+            });
         });
-}
 
-// ========== NEW: UPDATE SYNC STATUS ==========
-function updateSyncStatus() {
-    const statusEl = document.getElementById('sync-status');
-    if (!statusEl) return;
-    
-    fetch('data.json?' + new Date().getTime())
-        .then(r => r.json())
-        .then(data => {
-            const lastChecked = data.lastChecked ? new Date(data.lastChecked).toLocaleString() : 'Never';
-            const lastTested = data.lastTested ? new Date(data.lastTested).toLocaleString() : 'Never';
+        // ========== ACCESS CONTROL ==========
+        function verifyAccess() {
+            const code = document.getElementById('accessCode').value;
             
-            statusEl.innerHTML = `
-                <strong>📊 System Status:</strong><br>
-                ✅ Approved: ${data.approved?.length || 0} students<br>
-                ⏳ Pending: ${data.pending?.length || 0} approvals<br>
-                🕐 Last checked: ${lastChecked}<br>
-                🧪 Last tested: ${lastTested}
-            `;
-        })
-        .catch(() => {
-            statusEl.innerHTML = '❌ Could not load system status';
-        });
-}
+            if (code === ACCESS_CODE) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                sessionStorage.setItem('hasAccess', 'true');
+                showMessage('✅ Access granted! Loading leaderboard...', 2000);
+                loadData();
+            } else {
+                alert('❌ Incorrect access code');
+                document.getElementById('accessCode').value = '';
+                document.getElementById('accessCode').focus();
+            }
+        }
 
-// ========== NEW: ADD SYSTEM STATUS BANNER ==========
-function addSystemStatusBanner() {
-    const banner = document.createElement('div');
-    banner.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
-    banner.style.color = 'white';
-    banner.style.padding = '15px';
-    banner.style.borderRadius = '10px';
-    banner.style.margin = '20px 0';
-    banner.style.textAlign = 'center';
-    banner.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
-    
-    banner.innerHTML = `
-        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-            <div style="text-align: center;">
-                <div style="font-size: 24px; font-weight: bold;">🏆</div>
-                <div>Hot Beans 2026</div>
-            </div>
-            <div style="text-align: center;">
-                <div style="font-size: 24px; font-weight: bold;">✅</div>
-                <div>Google Form Active</div>
-            </div>
-            <div style="text-align: center;">
-                <div style="font-size: 24px; font-weight: bold;">🤖</div>
-                <div>Auto-Process Active</div>
-            </div>
-            <div style="text-align: center;">
-                <div style="font-size: 24px; font-weight: bold;">⚡</div>
-                <div>PageSpeed API Active</div>
-            </div>
-        </div>
-        <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.9;">
-            Students submit via form → Auto-process every 5 min → Teacher approval → Live leaderboard
-        </div>
-    `;
-    
-    // Insert after the subtitle
-    const subtitle = document.querySelector('.subtitle');
-    subtitle.parentNode.insertBefore(banner, subtitle.nextSibling);
-}
-        
+        // Allow Enter key in access code field
+        document.getElementById('accessCode')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyAccess();
+            }
+        });
+
+        // ========== LOAD DATA ==========
+        async function loadData() {
+            console.log('Loading data...');
+            
+            // Load from GitHub data.json (what students see)
+            await loadFromGitHub();
+            
+            // Load saved data from localStorage (teacher's working copy)
+            loadFromLocalStorage();
+            
+            // Refresh pending if teacher
+            if (isTeacher) {
+                await loadPending();
+                updateTeacherControls();
+                updateManagementPanel();
+            }
+            
+            renderLeaderboard();
+            updateLastUpdated();
+            
+            // Update sync status every minute if teacher
+            if (isTeacher) {
+                setInterval(updateSyncStatus, 60000);
+            }
+        }
+
+        // ========== LOAD FROM GITHUB ==========
+        async function loadFromGitHub() {
+            try {
+                const response = await fetch('data.json?' + new Date().getTime());
+                const data = await response.json();
+                
+                // For students: always use GitHub data
+                if (!isTeacher && data.approved) {
+                    leaderboard = data.approved.sort((a,b) => (b.score || 0) - (a.score || 0));
+                    hasLoadedFromJson = true;
+                    updateDataSourceBadge('github');
+                }
+                
+                // For teachers: load pending from data.json
+                if (isTeacher && data.pending) {
+                    data.pending.forEach(pendingStudent => {
+                        if (!pending.find(p => p.name === pendingStudent.name)) {
+                            const existing = leaderboard.find(s => 
+                                s.name.toLowerCase().includes(pendingStudent.name.toLowerCase())
+                            );
+                            
+                            pending.push({
+                                id: pendingStudent.id,
+                                name: pendingStudent.name,
+                                site: pendingStudent.site,
+                                repo: `https://github.com/${pendingStudent.github}`,
+                                avatar: '⏳',
+                                isUpdate: !!existing,
+                                existingVersion: existing ? (existing.version || 1) : 0
+                            });
+                        }
+                    });
+                    renderPending();
+                }
+                
+                console.log(`Loaded ${data.approved?.length || 0} students from GitHub`);
+                
+            } catch (error) {
+                console.log('Could not load from GitHub:', error);
+                updateDataSourceBadge('local');
+            }
+        }
+
         // ========== LOAD PENDING ==========
         async function loadPending() {
             try {
@@ -1073,6 +805,172 @@ function addSystemStatusBanner() {
             }
         }
 
+        // ========== TEACHER FUNCTIONS ==========
+        function enableTeacherMode() {
+            isTeacher = true;
+            localStorage.setItem('hotbeans-teacher', 'true');
+            
+            // Show teacher panels
+            document.getElementById('management-panel').style.display = 'block';
+            document.getElementById('pending-section').style.display = 'block';
+            document.getElementById('sync-controls').style.display = 'block';
+            
+            // Load auto-save preference
+            autoSaveEnabled = localStorage.getItem('hotbeans-autosave') === 'true';
+            if (document.getElementById('auto-save-toggle')) {
+                document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
+                document.getElementById('auto-save-toggle').onclick = toggleAutoSave;
+            }
+            
+            // Load teacher data
+            loadPending();
+            updateManagementPanel();
+            updateTeacherControls();
+            updateSyncStatus();
+            renderLeaderboard();
+            
+            showMessage('👨‍🏫 Teacher mode activated!', 3000);
+        }
+
+        function updateTeacherControls() {
+            const panel = document.getElementById('management-panel');
+            if (!panel || !isTeacher) return;
+            
+            // Add sync controls if not already there
+            const existingSync = document.getElementById('sync-controls');
+            if (!existingSync) {
+                const syncDiv = document.createElement('div');
+                syncDiv.id = 'sync-controls';
+                syncDiv.style.marginTop = '20px';
+                syncDiv.style.paddingTop = '15px';
+                syncDiv.style.borderTop = '2px solid #f8f9fa';
+                
+                syncDiv.innerHTML = `
+                    <h4>🔄 Google Form Sync</h4>
+                    <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                        <button class="github-btn" onclick="runAutoProcess()">
+                            🤖 Run Auto-Process
+                        </button>
+                        <button class="copy-btn" onclick="viewPendingStudents()">
+                            📋 View Pending
+                        </button>
+                        <a href="https://forms.gle/eQmcwZo1AjXVNM7DA" target="_blank" class="github-btn" style="text-decoration: none;">
+                            📝 View Google Form
+                        </a>
+                        <a href="https://github.com/Willxxx7/LeaderBoard/actions" target="_blank" class="copy-btn" style="text-decoration: none;">
+                            📊 View Actions
+                        </a>
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                        <strong>Auto-sync:</strong> Runs every 5 minutes<br>
+                        <strong>Process:</strong> Form → GitHub → Teacher approval → Publish
+                    </p>
+                    <div id="sync-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em;">
+                        Loading sync status...
+                    </div>
+                `;
+                
+                panel.appendChild(syncDiv);
+                updateSyncStatus();
+            }
+        }
+
+        function runAutoProcess() {
+            showMessage(`
+                <h3>🤖 Triggering Auto-Process</h3>
+                <p>This will:</p>
+                <ol style="text-align: left; display: inline-block;">
+                    <li>Check Google Form for new submissions</li>
+                    <li>Add new students to pending</li>
+                    <li>Test approved sites with PageSpeed API</li>
+                    <li>Update scores automatically</li>
+                </ol>
+                <br>
+                <button class="github-btn" onclick="
+                    window.open('https://github.com/Willxxx7/LeaderBoard/actions/workflows/auto-process.yml', '_blank');
+                    showMessage('Opening GitHub Actions...', 3000);
+                ">
+                    🚀 Open GitHub Actions
+                </button>
+                <button class="copy-btn" onclick="
+                    showMessage('🎬 Demo: Auto-process would run now!<br>In production, it runs every 5 minutes.', 5000);
+                ">
+                    🎬 Demo Run
+                </button>
+                <button class="copy-btn" onclick="showMessage('', 0)">
+                    ❌ Cancel
+                </button>
+            `, 0);
+        }
+
+        function viewPendingStudents() {
+            fetch('data.json?' + new Date().getTime())
+                .then(r => r.json())
+                .then(data => {
+                    const pending = data.pending || [];
+                    
+                    let html = `<h3>⏳ Pending Students from Google Form</h3>`;
+                    
+                    if (pending.length === 0) {
+                        html += `<p>No pending students. New submissions appear here within 5 minutes.</p>`;
+                    } else {
+                        html += `<p><strong>${pending.length} students waiting for approval</strong></p>`;
+                        html += `<div style="max-height: 300px; overflow-y: auto;">`;
+                        
+                        pending.forEach(p => {
+                            html += `
+                                <div style="padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                                    <strong>${p.name}</strong><br>
+                                    <small>Site: ${p.site}</small><br>
+                                    <small>GitHub: ${p.github || 'Not provided'}</small><br>
+                                    <small>Submitted: ${new Date(p.timestamp).toLocaleDateString()}</small>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `</div>`;
+                    }
+                    
+                    html += `
+                        <br>
+                        <button class="approve-btn" onclick="location.reload()">
+                            🔄 Refresh Page
+                        </button>
+                        <button class="copy-btn" onclick="showMessage('', 0)">
+                            ❌ Close
+                        </button>
+                    `;
+                    
+                    showMessage(html, 0);
+                })
+                .catch(() => {
+                    showMessage('❌ Could not load pending students', 3000);
+                });
+        }
+
+        function updateSyncStatus() {
+            const statusEl = document.getElementById('sync-status');
+            if (!statusEl) return;
+            
+            fetch('data.json?' + new Date().getTime())
+                .then(r => r.json())
+                .then(data => {
+                    const lastChecked = data.lastChecked ? new Date(data.lastChecked).toLocaleString() : 'Never';
+                    const lastTested = data.lastTested ? new Date(data.lastTested).toLocaleString() : 'Never';
+                    
+                    statusEl.innerHTML = `
+                        <strong>📊 System Status:</strong><br>
+                        ✅ Approved: ${data.approved?.length || 0} students<br>
+                        ⏳ Pending: ${data.pending?.length || 0} approvals<br>
+                        🕐 Last checked: ${lastChecked}<br>
+                        🧪 Last tested: ${lastTested}
+                    `;
+                })
+                .catch(() => {
+                    statusEl.innerHTML = '❌ Could not load system status';
+                });
+        }
+
         // ========== LOCALSTORAGE FUNCTIONS ==========
         function saveToLocalStorage() {
             localStorage.setItem('hotbeans-leaderboard', JSON.stringify(leaderboard));
@@ -1087,7 +985,6 @@ function addSystemStatusBanner() {
             if (saved) {
                 try {
                     const savedData = JSON.parse(saved);
-                    // Only merge if we have local changes
                     if (savedData.length > 0) {
                         leaderboard = savedData;
                         updateDataSourceBadge('local');
@@ -1096,74 +993,6 @@ function addSystemStatusBanner() {
                 } catch(e) {
                     console.log('Error loading localStorage');
                 }
-            }
-        }
-
-        // ========== GITHUB PUBLISHING ==========
-        async function publishToGitHub() {
-            if (!confirm('Publish current leaderboard to GitHub?\n\nStudents will see this data immediately.')) {
-                return;
-            }
-            
-            showMessage('📤 Publishing to GitHub...', 0);
-            
-            const data = {
-                approved: leaderboard,
-                pending: [], // Don't save pending to GitHub
-                lastUpdated: new Date().toISOString().split('T')[0],
-                totalEntries: leaderboard.length,
-                publishedBy: 'Teacher',
-                publishedAt: new Date().toISOString()
-            };
-            
-            const jsonStr = JSON.stringify(data, null, 2);
-            
-            // Create GitHub editor URL with pre-filled content
-            const githubUrl = `https://github.com/${GITHUB_REPO}/edit/main/${GITHUB_FILE}`;
-            
-            // Show the JSON and open GitHub
-            showMessage(`
-                <h3>🚀 Ready to Publish!</h3>
-                <p><strong>${leaderboard.length} students will be published</strong></p>
-                <ol style="text-align: left; display: inline-block;">
-                    <li>Click the link below to open GitHub</li>
-                    <li>Replace everything in the file with this JSON</li>
-                    <li>Click "Commit changes" (green button)</li>
-                    <li>Wait 1 minute for GitHub Pages to update</li>
-                </ol>
-                <pre>${jsonStr}</pre>
-                <br>
-                <button class="copy-btn" onclick="copyToClipboard('${escapeString(jsonStr)}')">
-                    📋 Copy JSON
-                </button>
-                <a href="${githubUrl}" target="_blank" class="github-btn" style="text-decoration: none;">
-                    ✏️ Open GitHub Editor
-                </a>
-                <button class="copy-btn" onclick="showMessage('', 0)">
-                    ❌ Cancel
-                </button>
-            `, 0);
-            
-            // Mark as saved
-            localStorage.setItem('hotbeans-unsaved', 'false');
-            hasUnsavedChanges = false;
-            updateSaveStatus();
-            updateDataSourceBadge('github');
-        }
-
-        // ========== AUTO-SAVE FEATURE ==========
-        function toggleAutoSave() {
-            autoSaveEnabled = !autoSaveEnabled;
-            document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
-            localStorage.setItem('hotbeans-autosave', autoSaveEnabled);
-            showMessage(`Auto-save ${autoSaveEnabled ? 'enabled' : 'disabled'}`, 3000);
-        }
-
-        function checkAutoSave() {
-            if (autoSaveEnabled && hasUnsavedChanges) {
-                // In a real app, you'd use GitHub API here
-                console.log('Auto-save triggered');
-                showMessage('💾 Auto-save ready (manual publish required)', 3000);
             }
         }
 
@@ -1255,6 +1084,48 @@ function addSystemStatusBanner() {
             updateManagementPanel();
         }
 
+        function updateStudentScore(studentName) {
+            if (!isTeacher) return;
+            
+            const decodedName = decodeString(studentName);
+            const student = leaderboard.find(s => s.name === decodedName);
+            if (!student) return;
+            
+            const newScore = Math.floor(Math.random() * 20) + 75;
+            const today = new Date().toISOString().split('T')[0];
+            const oldScore = student.score;
+            
+            student.score = newScore;
+            student.speedIndex = (Math.random() * 1.5 + 1.5).toFixed(1) + "s";
+            student.ttfb = Math.floor(Math.random() * 300 + 200) + "ms";
+            student.lastTested = today;
+            student.lastUpdated = today;
+            student.previousScore = oldScore;
+            student.version = (student.version || 1) + 1;
+            
+            leaderboard.sort((a,b) => b.score - a.score);
+            saveToLocalStorage();
+            checkAutoSave();
+            
+            renderLeaderboard();
+            showMessage(`🔄 Updated ${decodedName}: ${oldScore} → ${newScore}/100`, 3000);
+        }
+
+        function removeStudent(studentName) {
+            if (!isTeacher) return;
+            
+            const decodedName = decodeString(studentName);
+            if (!confirm(`Remove "${decodedName}" from leaderboard?`)) return;
+            
+            leaderboard = leaderboard.filter(entry => entry.name !== decodedName);
+            saveToLocalStorage();
+            checkAutoSave();
+            
+            showMessage(`🗑️ Removed ${decodedName}`, 3000);
+            renderLeaderboard();
+            updateManagementPanel();
+        }
+
         // ========== RENDER FUNCTIONS ==========
         function renderLeaderboard() {
             const container = document.getElementById('leaderboard-list');
@@ -1343,107 +1214,6 @@ function addSystemStatusBanner() {
             }).join('');
         }
 
-        // ========== TEACHER FUNCTIONS ==========
-       // ========== HIDDEN TEACHER ACCESS ==========
-function checkTeacher() {
-    // This is now hidden - checks URL or localStorage first
-    const url = new URL(window.location.href);
-    
-    // Option 1: Check URL hash (#teacher)
-    if (url.hash === '#teacher') {
-        const pass = prompt('Teacher password:');
-        if (pass === 'YourNewPassword123') {
-            enableTeacherMode();
-            return;
-        }
-    }
-    
-    // Option 2: Check for visible form (if you keep it hidden)
-    const pass = document.getElementById('teacherPass')?.value;
-    if (pass && pass === 'YourNewPassword123') {
-        enableTeacherMode();
-    } else if (pass) {
-        showMessage('❌ Wrong password', 3000);
-    }
-}
-
-// Called by both methods above
-function enableTeacherMode() {
-    isTeacher = true;
-    
-    // Show teacher panels
-    document.getElementById('management-panel').style.display = 'block';
-    document.getElementById('pending-section').style.display = 'block';
-    
-    // Load auto-save preference
-    autoSaveEnabled = localStorage.getItem('hotbeans-autosave') === 'true';
-    if (document.getElementById('auto-save-toggle')) {
-        document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
-        document.getElementById('auto-save-toggle').onclick = toggleAutoSave;
-    }
-    
-    // Load teacher data
-    loadPending();
-    updateManagementPanel();
-    updateTeacherControls();
-    updateSyncStatus();
-    renderLeaderboard();
-    
-    showMessage('👨‍🏫 Teacher mode activated!', 3000);
-}
-
-// Optional: Add keyboard shortcut too
-document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.shiftKey && e.key === 'T') {
-        const pass = prompt('Teacher password:');
-        if (pass === 'YourNewPassword123') {
-            enableTeacherMode();
-        }
-    }
-});
-
-        function updateStudentScore(studentName) {
-            if (!isTeacher) return;
-            
-            const decodedName = decodeString(studentName);
-            const student = leaderboard.find(s => s.name === decodedName);
-            if (!student) return;
-            
-            const newScore = Math.floor(Math.random() * 20) + 75;
-            const today = new Date().toISOString().split('T')[0];
-            const oldScore = student.score;
-            
-            student.score = newScore;
-            student.speedIndex = (Math.random() * 1.5 + 1.5).toFixed(1) + "s";
-            student.ttfb = Math.floor(Math.random() * 300 + 200) + "ms";
-            student.lastTested = today;
-            student.lastUpdated = today;
-            student.previousScore = oldScore;
-            student.version = (student.version || 1) + 1;
-            
-            leaderboard.sort((a,b) => b.score - a.score);
-            saveToLocalStorage();
-            checkAutoSave();
-            
-            renderLeaderboard();
-            showMessage(`🔄 Updated ${decodedName}: ${oldScore} → ${newScore}/100`, 3000);
-        }
-
-        function removeStudent(studentName) {
-            if (!isTeacher) return;
-            
-            const decodedName = decodeString(studentName);
-            if (!confirm(`Remove "${decodedName}" from leaderboard?`)) return;
-            
-            leaderboard = leaderboard.filter(entry => entry.name !== decodedName);
-            saveToLocalStorage();
-            checkAutoSave();
-            
-            showMessage(`🗑️ Removed ${decodedName}`, 3000);
-            renderLeaderboard();
-            updateManagementPanel();
-        }
-
         // ========== MANAGEMENT PANEL ==========
         function updateManagementPanel() {
             const list = document.getElementById('student-management-list');
@@ -1470,6 +1240,70 @@ document.addEventListener('keydown', function(e) {
                     </div>
                 `).join('')}
             `;
+        }
+
+        // ========== GITHUB PUBLISHING ==========
+        async function publishToGitHub() {
+            if (!confirm('Publish current leaderboard to GitHub?\n\nStudents will see this data immediately.')) {
+                return;
+            }
+            
+            showMessage('📤 Publishing to GitHub...', 0);
+            
+            const data = {
+                approved: leaderboard,
+                pending: [],
+                lastUpdated: new Date().toISOString().split('T')[0],
+                totalEntries: leaderboard.length,
+                publishedBy: 'Teacher',
+                publishedAt: new Date().toISOString()
+            };
+            
+            const jsonStr = JSON.stringify(data, null, 2);
+            
+            const githubUrl = `https://github.com/${GITHUB_REPO}/edit/main/${GITHUB_FILE}`;
+            
+            showMessage(`
+                <h3>🚀 Ready to Publish!</h3>
+                <p><strong>${leaderboard.length} students will be published</strong></p>
+                <ol style="text-align: left; display: inline-block;">
+                    <li>Click the link below to open GitHub</li>
+                    <li>Replace everything in the file with this JSON</li>
+                    <li>Click "Commit changes" (green button)</li>
+                    <li>Wait 1 minute for GitHub Pages to update</li>
+                </ol>
+                <pre>${jsonStr}</pre>
+                <br>
+                <button class="copy-btn" onclick="copyToClipboard('${escapeString(jsonStr)}')">
+                    📋 Copy JSON
+                </button>
+                <a href="${githubUrl}" target="_blank" class="github-btn" style="text-decoration: none;">
+                    ✏️ Open GitHub Editor
+                </a>
+                <button class="copy-btn" onclick="showMessage('', 0)">
+                    ❌ Cancel
+                </button>
+            `, 0);
+            
+            localStorage.setItem('hotbeans-unsaved', 'false');
+            hasUnsavedChanges = false;
+            updateSaveStatus();
+            updateDataSourceBadge('github');
+        }
+
+        // ========== AUTO-SAVE FEATURE ==========
+        function toggleAutoSave() {
+            autoSaveEnabled = !autoSaveEnabled;
+            document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
+            localStorage.setItem('hotbeans-autosave', autoSaveEnabled);
+            showMessage(`Auto-save ${autoSaveEnabled ? 'enabled' : 'disabled'}`, 3000);
+        }
+
+        function checkAutoSave() {
+            if (autoSaveEnabled && hasUnsavedChanges) {
+                console.log('Auto-save triggered');
+                showMessage('💾 Auto-save ready (manual publish required)', 3000);
+            }
         }
 
         // ========== STATUS UPDATES ==========
@@ -1576,9 +1410,7 @@ document.addEventListener('keydown', function(e) {
             document.getElementById('testUrl').value = '';
         }
 
-        // ========== INITIALIZATION ==========
-        loadData();
-        
+        // ========== INITIAL LOAD ==========
         // Auto-refresh pending
         setInterval(() => {
             if (isTeacher) loadPending();
@@ -1587,39 +1419,19 @@ document.addEventListener('keydown', function(e) {
         
         setInterval(updateLastUpdated, 60000);
 
-        // ========== INITIALIZE NEW FEATURES ==========
-// Add system status banner
-addSystemStatusBanner();
-
-// Check for PageSpeed API key status
-setTimeout(() => {
-    fetch('data.json?' + new Date().getTime())
-        .then(r => r.json())
-        .then(data => {
-            if (data.approved && data.approved.some(s => s.score > 0 && !s.isDemo)) {
-                console.log('✅ PageSpeed API is working!');
-            }
-        })
-        .catch(() => {
-            console.log('⚠️  data.json not found or error loading');
-        });
-}, 1000);
-
-        // ========== HIDDEN TEACHER ACCESS ==========
-document.addEventListener('keydown', function(e) {
-    // Press Ctrl+Alt+Shift+T to enable teacher mode
-    if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'T') {
-        const pass = prompt('Teacher password:');
-        if (pass === 'HotBeans2026###') {
-            isTeacher = true;
-            document.getElementById('management-panel').style.display = 'block';
-            document.getElementById('pending-section').style.display = 'block';
-            showMessage('👨‍🏫 Teacher mode enabled (hidden)', 3000);
-        }
-    }
-});
-
+        // Check for PageSpeed API key status
+        setTimeout(() => {
+            fetch('data.json?' + new Date().getTime())
+                .then(r => r.json())
+                .then(data => {
+                    if (data.approved && data.approved.some(s => s.score > 0 && !s.isDemo)) {
+                        console.log('✅ PageSpeed API is working!');
+                    }
+                })
+                .catch(() => {
+                    console.log('⚠️  data.json not found or error loading');
+                });
+        }, 1000);
     </script>
 </body>
 </html>
-
