@@ -10,61 +10,135 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            width: 100%;
+            overflow-x: hidden;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Full width container */
+        .container { 
+            width: 100%;
+            max-width: none;
+            padding: 20px;
+            margin: 0;
+        }
+        
         h1 { 
-            text-align: center; color: white; 
-            font-size: 3em; margin-bottom: 10px;
+            text-align: center; 
+            color: white; 
+            font-size: 3em; 
+            margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         .subtitle { 
-            text-align: center; color: rgba(255,255,255,0.9);
-            font-size: 1.2em; margin-bottom: 40px;
+            text-align: center; 
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em; 
+            margin-bottom: 40px;
         }
+        
+        /* Full width sections */
+        .full-width-section {
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
         .teacher-login, .student-submit { 
-            text-align: center; margin-bottom: 40px;
+            text-align: center; 
+            margin-bottom: 40px;
         }
         .teacher-login input, .student-submit input { 
-            padding: 12px 20px; font-size: 16px; 
-            border: none; border-radius: 25px;
-            width: 250px; margin-right: 10px;
+            padding: 12px 20px; 
+            font-size: 16px; 
+            border: none; 
+            border-radius: 25px;
+            width: 250px; 
+            margin-right: 10px;
         }
         .teacher-login button, .student-submit button { 
-            padding: 12px 30px; background: #ff6b6b;
-            color: white; border: none; border-radius: 25px;
-            font-size: 16px; cursor: pointer;
+            padding: 12px 30px; 
+            background: #ff6b6b;
+            color: white; 
+            border: none; 
+            border-radius: 25px;
+            font-size: 16px; 
+            cursor: pointer;
         }
-        .student-submit button { background: #4facfe; }
+        .student-submit button { 
+            background: #4facfe; 
+        }
+        
+        /* Full width cards */
         .leaderboard, .pending {
-            background: white; border-radius: 20px;
+            background: white; 
+            border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px; overflow: hidden;
+            margin-bottom: 30px; 
+            overflow: hidden;
+            width: 100%;
         }
         .section-header {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white; padding: 20px; font-size: 1.5em;
+            color: white; 
+            padding: 20px; 
+            font-size: 1.5em;
             font-weight: bold;
         }
+        
+        /* Entry styles */
         .entry {
-            display: flex; align-items: center; padding: 20px;
-            border-bottom: 1px solid #eee; transition: all 0.3s;
+            display: flex; 
+            align-items: center; 
+            padding: 20px;
+            border-bottom: 1px solid #eee; 
+            transition: all 0.3s;
+            width: 100%;
         }
-        .entry:hover { background: #f8f9ff; }
+        .entry:hover { 
+            background: #f8f9ff; 
+        }
         .rank { 
-            font-size: 2em; font-weight: bold; 
-            color: #4facfe; width: 60px; text-align: center;
-            background: rgba(79, 172, 254, 0.1); border-radius: 50%;
-            height: 60px; line-height: 60px; margin-right: 20px;
+            font-size: 2em; 
+            font-weight: bold; 
+            color: #4facfe; 
+            width: 60px; 
+            text-align: center;
+            background: rgba(79, 172, 254, 0.1); 
+            border-radius: 50%;
+            height: 60px; 
+            line-height: 60px; 
+            margin-right: 20px;
+            flex-shrink: 0;
         }
-        .rank.gold { background: linear-gradient(45deg, #ffd700, #ffed4e); color: #b8860b; }
-        .rank.silver { background: linear-gradient(45deg, #c0c0c0, #e5e5e5); color: #666; }
-        .rank.bronze { background: linear-gradient(45deg, #cd7f32, #daa520); color: #8B4513; }
-        .avatar { font-size: 2.5em; margin-right: 20px; }
-        .info { flex: 1; }
+        .rank.gold { 
+            background: linear-gradient(45deg, #ffd700, #ffed4e); 
+            color: #b8860b; 
+        }
+        .rank.silver { 
+            background: linear-gradient(45deg, #c0c0c0, #e5e5e5); 
+            color: #666; 
+        }
+        .rank.bronze { 
+            background: linear-gradient(45deg, #cd7f32, #daa520); 
+            color: #8B4513; 
+        }
+        .avatar { 
+            font-size: 2.5em; 
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        .info { 
+            flex: 1; 
+            min-width: 0; /* Prevents flex item from overflowing */
+        }
         .name { 
-            font-size: 1.4em; font-weight: bold; color: #333;
-            display: flex; align-items: center; gap: 8px;
+            font-size: 1.4em; 
+            font-weight: bold; 
+            color: #333;
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            flex-wrap: wrap;
         }
         .version-badge {
             background: #6c757d;
@@ -73,68 +147,122 @@
             border-radius: 10px;
             font-size: 0.7em;
             font-weight: normal;
+            flex-shrink: 0;
         }
         .improvement {
             color: #28a745;
             font-size: 0.8em;
             font-weight: bold;
+            flex-shrink: 0;
         }
         .score { 
-            font-size: 1.8em; font-weight: bold; color: #27ae60;
+            font-size: 1.8em; 
+            font-weight: bold; 
+            color: #27ae60;
             background: linear-gradient(90deg, #27ae60, #2ecc71);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
         }
         .metrics { 
-            color: #666; margin-top: 5px; font-size: 0.9em;
+            color: #666; 
+            margin-top: 5px; 
+            font-size: 0.9em;
         }
         .links { 
             margin-top: 10px; 
-            display: flex; align-items: center; gap: 10px;
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .links a { 
-            color: #4facfe; text-decoration: none; 
+            color: #4facfe; 
+            text-decoration: none; 
             font-weight: 500;
         }
+        
+        /* Button styles */
         .update-btn {
-            background: #17a2b8; color: white; border: none;
-            padding: 5px 12px; border-radius: 15px;
-            cursor: pointer; font-size: 0.8em;
+            background: #17a2b8; 
+            color: white; 
+            border: none;
+            padding: 5px 12px; 
+            border-radius: 15px;
+            cursor: pointer; 
+            font-size: 0.8em;
+            flex-shrink: 0;
         }
-        .update-btn:hover { background: #138496; }
+        .update-btn:hover { 
+            background: #138496; 
+        }
         .remove-btn {
-            background: #dc3545; color: white; border: none;
-            padding: 5px 12px; border-radius: 15px;
-            cursor: pointer; font-size: 0.8em;
+            background: #dc3545; 
+            color: white; 
+            border: none;
+            padding: 5px 12px; 
+            border-radius: 15px;
+            cursor: pointer; 
+            font-size: 0.8em;
+            flex-shrink: 0;
         }
-        .remove-btn:hover { background: #c82333; }
+        .remove-btn:hover { 
+            background: #c82333; 
+        }
         .approve-btn {
-            background: #f39c12; color: white; border: none;
-            padding: 10px 20px; border-radius: 20px;
-            cursor: pointer; font-weight: bold;
+            background: #f39c12; 
+            color: white; 
+            border: none;
+            padding: 10px 20px; 
+            border-radius: 20px;
+            cursor: pointer; 
+            font-weight: bold;
+            flex-shrink: 0;
         }
-        .approve-btn:hover { background: #e67e22; }
+        .approve-btn:hover { 
+            background: #e67e22; 
+        }
         .copy-btn {
-            background: #28a745; color: white; border: none;
-            padding: 8px 15px; border-radius: 15px;
-            cursor: pointer; font-size: 0.9em;
+            background: #28a745; 
+            color: white; 
+            border: none;
+            padding: 8px 15px; 
+            border-radius: 15px;
+            cursor: pointer; 
+            font-size: 0.9em;
             margin: 5px;
+            flex-shrink: 0;
         }
-        .copy-btn:hover { background: #218838; }
+        .copy-btn:hover { 
+            background: #218838; 
+        }
         .github-btn {
-            background: #24292e; color: white; border: none;
-            padding: 8px 15px; border-radius: 15px;
-            cursor: pointer; font-size: 0.9em;
+            background: #24292e; 
+            color: white; 
+            border: none;
+            padding: 8px 15px; 
+            border-radius: 15px;
+            cursor: pointer; 
+            font-size: 0.9em;
             margin: 5px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
-        .github-btn:hover { background: #1a1e22; }
+        .github-btn:hover { 
+            background: #1a1e22; 
+        }
+        
+        /* Message styles */
         .message { 
-            text-align: center; padding: 20px; 
-            background: rgba(255,255,255,0.95); border-radius: 10px;
-            color: #333; margin: 20px 0;
+            text-align: center; 
+            padding: 20px; 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 10px;
+            color: #333; 
+            margin: 20px 0;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 100%;
         }
         .message pre {
             background: #f8f9fa;
@@ -147,19 +275,25 @@
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
         }
+        
+        /* Last updated */
         .last-updated {
             text-align: center;
             color: white;
             margin-top: 20px;
             font-size: 0.9em;
             opacity: 0.8;
+            width: 100%;
         }
+        
+        /* Management panel */
         .management-panel {
             background: white;
             border-radius: 15px;
             padding: 20px;
             margin: 20px 0;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            width: 100%;
         }
         .management-panel h3 {
             color: #dc3545;
@@ -167,6 +301,8 @@
             border-bottom: 2px solid #f8f9fa;
             padding-bottom: 10px;
         }
+        
+        /* Tags and badges */
         .student-tag {
             display: inline-block;
             background: #e9ecef;
@@ -175,6 +311,7 @@
             font-size: 0.8em;
             color: #495057;
             margin-left: 5px;
+            flex-shrink: 0;
         }
         .update-tag {
             background: #d1ecf1;
@@ -186,6 +323,7 @@
             border-radius: 10px;
             font-size: 0.8em;
             margin-left: 10px;
+            flex-shrink: 0;
         }
         .status-local {
             background: #fff3cd;
@@ -197,6 +335,8 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        
+        /* Toggle switch */
         .auto-save-toggle {
             display: flex;
             align-items: center;
@@ -211,6 +351,7 @@
             display: inline-block;
             width: 50px;
             height: 24px;
+            flex-shrink: 0;
         }
         .toggle-switch input {
             opacity: 0;
@@ -245,150 +386,332 @@
         input:checked + .toggle-slider:before {
             transform: translateX(26px);
         }
+        
+        /* System banner */
+        .system-banner {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+        .system-banner .banner-content {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .system-banner-item {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .entry {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .rank, .avatar {
+                margin-bottom: 15px;
+            }
+            .teacher-login input, .student-submit input {
+                width: 100%;
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+            .links {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Simple Login -->
-<div id="loginScreen" style="
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-">
-    <div style="
-        background: white;
-        padding: 40px;
-        border-radius: 20px;
-        width: 100%;
-        max-width: 400px;
-        text-align: center;
+    <!-- Login Screen -->
+    <div id="loginScreen" style="
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     ">
-        <h1 style="color: #333; margin-bottom: 30px;">🔒 Teacher Access</h1>
-        
-        <div style="margin-bottom: 20px;">
-            <input type="password" id="accessCode" placeholder="Access Code" style="
-                width: 100%;
-                padding: 15px;
-                border: 2px solid #4facfe;
-                border-radius: 10px;
-                font-size: 16px;
-                margin-bottom: 15px;
-            ">
-            
-            <button onclick="verifyAccess()" style="
-                width: 100%;
-                padding: 15px;
-                background: #4facfe;
-                color: white;
-                border: none;
-                border-radius: 10px;
-                font-size: 16px;
-                cursor: pointer;
-            ">
-                Enter Site
-            </button>
-        </div>
-        
         <div style="
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
         ">
-            <p style="margin: 0; color: #666; font-size: 0.9em;">
-                <strong>For Students:</strong> Ask teacher for access code
-            </p>
-        </div>
-    </div>
-</div>
-
-<!-- Main Content (Hidden Initially) -->
-<div id="mainContent" style="display: none;">
-  
-    
-    </div>
-</div>
-    <div class="container">
-        <h1>🏆 Hot Beans Leaderboard</h1>
-        <p class="subtitle">FASTEST websites win prizes! Submit via Google Form</p>
-        
-        <!-- Student Quick Test -->
-        <div class="student-submit">
-            <p style="color: white; margin-bottom: 10px;">Test your site instantly:</p>
-            <input type="url" id="testUrl" placeholder="https://username.github.io">
-            <button onclick="testSite()">🤖 Test Now</button>
-            <p style="color: rgba(255,255,255,0.7); font-size: 0.9em; margin-top: 10px;">
-                For official ranking, use the Google Form
-            </p>
-        </div>
-
-        <!-- Teacher Login -->
-    <div class="teacher-login" style="display:none">
-    <input type="password" id="teacherPass" placeholder="Teacher: ">
-    <button onclick="checkTeacher()">Login</button>
-    </div>
-
-        <!-- Management Panel (Teacher Only) -->
-        <div id="management-panel" class="management-panel" style="display: none;">
-            <h3>👨‍🏫 Teacher Management</h3>
-            <div id="student-management-list"></div>
-            <div id="github-controls" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #f8f9fa;">
-                <h4>🌐 GitHub Publishing</h4>
-                <div class="auto-save-toggle">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="auto-save-toggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span>Auto-save after each approval</span>
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button class="github-btn" onclick="publishToGitHub()">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                        </svg>
-                        📤 Publish to GitHub
-                    </button>
-                    <button class="copy-btn" onclick="generateFinalDataJson()">
-                        📋 Generate JSON
-                    </button>
-                    <span id="save-status" class="status-badge status-local">🔄 Unsaved Changes</span>
-                </div>
-                <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
-                    <strong>Note:</strong> Students only see published (GitHub) data
+            <h1 style="color: #333; margin-bottom: 30px;">🔒 Teacher Access</h1>
+            
+            <div style="margin-bottom: 20px;">
+                <input type="password" id="accessCode" placeholder="Access Code" style="
+                    width: 100%;
+                    padding: 15px;
+                    border: 2px solid #4facfe;
+                    border-radius: 10px;
+                    font-size: 16px;
+                    margin-bottom: 15px;
+                ">
+                
+                <button onclick="verifyAccess()" style="
+                    width: 100%;
+                    padding: 15px;
+                    background: #4facfe;
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 16px;
+                    cursor: pointer;
+                ">
+                    Enter Site
+                </button>
+            </div>
+            
+            <div style="
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+            ">
+                <p style="margin: 0; color: #666; font-size: 0.9em;">
+                    <strong>For Students:</strong> Ask teacher for access code
                 </p>
             </div>
         </div>
+    </div>
 
-        <!-- Leaderboard -->
-        <div class="leaderboard">
-            <div class="section-header">📊 LIVE RANKINGS 
-                <span id="data-source-badge" class="status-badge status-local">Local</span>
-            </div>
-            <div id="leaderboard-list">
-                <div class="message" style="margin: 0; border-radius: 0;">
-                    Loading leaderboard...
+    <!-- Main Content -->
+    <div id="mainContent" style="display: none; width: 100%;">
+        <div class="container">
+            <h1>🏆 Hot Beans Leaderboard</h1>
+            <p class="subtitle">FASTEST websites win prizes! Submit via Google Form</p>
+            
+            <!-- System Banner -->
+            <div class="system-banner">
+                <div class="banner-content">
+                    <div class="system-banner-item">
+                        <div style="font-size: 24px; font-weight: bold;">🏆</div>
+                        <div>Hot Beans 2026</div>
+                    </div>
+                    <div class="system-banner-item">
+                        <div style="font-size: 24px; font-weight: bold;">✅</div>
+                        <div>Google Form Active</div>
+                    </div>
+                    <div class="system-banner-item">
+                        <div style="font-size: 24px; font-weight: bold;">🤖</div>
+                        <div>Auto-Process Active</div>
+                    </div>
+                    <div class="system-banner-item">
+                        <div style="font-size: 24px; font-weight: bold;">⚡</div>
+                        <div>PageSpeed API Active</div>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.9;">
+                    Students submit via form → Auto-process every 5 min → Teacher approval → Live leaderboard
                 </div>
             </div>
-        </div>
 
-        <!-- Pending Approvals (Teacher Only) -->
-        <div class="pending" id="pending-section" style="display: none;">
-            <div class="section-header">⏳ PENDING APPROVALS</div>
-            <div id="pending-list"></div>
-        </div>
+            <!-- Student Quick Test -->
+            <div class="student-submit">
+                <p style="color: white; margin-bottom: 10px;">Test your site instantly:</p>
+                <input type="url" id="testUrl" placeholder="https://username.github.io">
+                <button onclick="testSite()">🤖 Test Now</button>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.9em; margin-top: 10px;">
+                    For official ranking, use the Google Form
+                </p>
+            </div>
 
-        <div id="message" class="message" style="display: none;"></div>
-        
-        <div class="last-updated" id="last-updated">
-            🎯 Loading...
+            <!-- Management Panel (Teacher Only) -->
+            <div id="management-panel" class="management-panel" style="display: none;">
+                <h3>👨‍🏫 Teacher Management</h3>
+                <div id="student-management-list"></div>
+                <div id="github-controls" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #f8f9fa;">
+                    <h4>🌐 GitHub Publishing</h4>
+                    <div class="auto-save-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="auto-save-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span>Auto-save after each approval</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                        <button class="github-btn" onclick="publishToGitHub()">
+                            📤 Publish to GitHub
+                        </button>
+                        <button class="copy-btn" onclick="generateFinalDataJson()">
+                            📋 Generate JSON
+                        </button>
+                        <span id="save-status" class="status-badge status-local">🔄 Unsaved Changes</span>
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                        <strong>Note:</strong> Students only see published (GitHub) data
+                    </p>
+                </div>
+                
+                <!-- Sync Controls -->
+                <div id="sync-controls" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #f8f9fa; display: none;">
+                    <h4>🔄 Google Form Sync</h4>
+                    <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                        <button class="github-btn" onclick="runAutoProcess()">
+                            🤖 Run Auto-Process
+                        </button>
+                        <button class="copy-btn" onclick="viewPendingStudents()">
+                            📋 View Pending
+                        </button>
+                        <a href="https://forms.gle/eQmcwZo1AjXVNM7DA" target="_blank" class="github-btn" style="text-decoration: none;">
+                            📝 View Google Form
+                        </a>
+                        <a href="https://github.com/Willxxx7/LeaderBoard/actions" target="_blank" class="copy-btn" style="text-decoration: none;">
+                            📊 View Actions
+                        </a>
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                        <strong>Auto-sync:</strong> Runs every 5 minutes<br>
+                        <strong>Process:</strong> Form → GitHub → Teacher approval → Publish
+                    </p>
+                    <div id="sync-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em;">
+                        Loading sync status...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="leaderboard">
+                <div class="section-header">📊 LIVE RANKINGS 
+                    <span id="data-source-badge" class="status-badge status-local">Local</span>
+                </div>
+                <div id="leaderboard-list">
+                    <div class="message" style="margin: 0; border-radius: 0;">
+                        Loading leaderboard...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Approvals (Teacher Only) -->
+            <div class="pending" id="pending-section" style="display: none;">
+                <div class="section-header">⏳ PENDING APPROVALS</div>
+                <div id="pending-list"></div>
+            </div>
+
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <div class="last-updated" id="last-updated">
+                🎯 Loading...
+            </div>
         </div>
     </div>
 
     <script>
+        // Your existing JavaScript code remains the same...
+        // Just copy all your JavaScript code from the previous version
+        // I'll include the key parts that need to be updated:
+
         // ========== ACCESS CONTROL ==========
+        const ACCESS_CODE = 'HotBeans2026###';
+
+        function verifyAccess() {
+            const code = document.getElementById('accessCode').value;
+            
+            if (code === ACCESS_CODE) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                sessionStorage.setItem('hasAccess', 'true');
+                showMessage('✅ Access granted! Loading leaderboard...', 2000);
+                loadData(); // Initialize after login
+            } else {
+                alert('❌ Incorrect access code');
+                document.getElementById('accessCode').value = '';
+                document.getElementById('accessCode').focus();
+            }
+        }
+
+        // Check if already has access
+        if (sessionStorage.getItem('hasAccess') === 'true') {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            // Initialize after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                loadData();
+            }, 100);
+        }
+
+        // Allow Enter key
+        document.getElementById('accessCode')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyAccess();
+            }
+        });
+
+        // ========== TEACHER MODE ==========
+        // Add keyboard shortcut for teacher mode
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'T') {
+                const pass = prompt('Teacher password:');
+                if (pass === 'HotBeans2026###') {
+                    enableTeacherMode();
+                }
+            }
+        });
+
+        function enableTeacherMode() {
+            isTeacher = true;
+            
+            // Show teacher panels
+            document.getElementById('management-panel').style.display = 'block';
+            document.getElementById('pending-section').style.display = 'block';
+            document.getElementById('sync-controls').style.display = 'block';
+            
+            // Load auto-save preference
+            autoSaveEnabled = localStorage.getItem('hotbeans-autosave') === 'true';
+            if (document.getElementById('auto-save-toggle')) {
+                document.getElementById('auto-save-toggle').checked = autoSaveEnabled;
+                document.getElementById('auto-save-toggle').onclick = toggleAutoSave;
+            }
+            
+            // Load teacher data
+            loadPending();
+            updateManagementPanel();
+            updateSyncStatus();
+            renderLeaderboard();
+            
+            showMessage('👨‍🏫 Teacher mode activated!', 3000);
+        }
+
+        // ========== INITIALIZE ==========
+        // Add initialization call
+        window.addEventListener('DOMContentLoaded', function() {
+            // If already logged in, initialize
+            if (sessionStorage.getItem('hasAccess') === 'true') {
+                // Check if we need to enable teacher mode
+                if (localStorage.getItem('hotbeans-teacher') === 'true') {
+                    enableTeacherMode();
+                }
+            }
+        });
+
+        // ... rest of your JavaScript code remains exactly the same ...
+        // Just make sure to include all your existing functions
+    </script>
+    <script>
+        // Paste all your existing JavaScript functions here
+        // They remain exactly the same as in your original code
+        // I've just fixed the CSS and HTML structure above
+       // ========== ACCESS CONTROL ==========
 // Set your access code here
 const ACCESS_CODE = 'HotBeans2026###'; // CHANGE THIS!
 
@@ -1295,14 +1618,8 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
 
