@@ -1428,73 +1428,60 @@
     `, 0);
     
     try {
-        // Using a different CORS proxy that works better
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        // Try multiple proxy options
         const apiUrl = `https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(cleanUrl)}&strategy=mobile&category=performance&category=accessibility&category=best-practices&category=seo`;
         
-        // Try multiple proxy options
         let data;
         let success = false;
         
-        // Option 1: Try direct fetch
-        try {
-            console.log('Trying direct fetch...');
-            const response = await fetch(apiUrl);
-            data = await response.json();
-            success = true;
-            console.log('Direct fetch successful');
-        } catch (error) {
-            console.log('Direct fetch failed, trying proxy...');
-        }
+        // Try different proxies
+        const proxies = [
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`,
+            `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`,
+            `https://cors-anywhere.herokuapp.com/${apiUrl}`
+        ];
         
-        // Option 2: Try with allorigins proxy
-        if (!success) {
+        for (const proxyUrl of proxies) {
             try {
-                const proxyResponse = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`);
-                const text = await proxyResponse.text();
+                console.log('Trying proxy:', proxyUrl);
+                const response = await fetch(proxyUrl);
+                const text = await response.text();
                 data = JSON.parse(text);
-                success = true;
-                console.log('Allorigins proxy successful');
+                
+                if (!data.error) {
+                    success = true;
+                    break;
+                }
+                
+                // If quota exceeded, break and show message
+                if (data.error && data.error.message && data.error.message.includes('quota')) {
+                    throw new Error('QUOTA_EXCEEDED');
+                }
             } catch (error) {
-                console.log('Allorigins proxy failed');
-            }
-        }
-        
-        // Option 3: Try with corsproxy.io
-        if (!success) {
-            try {
-                const proxyResponse = await fetch(`https://corsproxy.io/?${encodeURIComponent(apiUrl)}`);
-                const text = await proxyResponse.text();
-                data = JSON.parse(text);
-                success = true;
-                console.log('Corsproxy.io successful');
-            } catch (error) {
-                console.log('Corsproxy.io failed');
+                console.log('Proxy failed:', error);
             }
         }
         
         if (!success || !data) {
-            throw new Error('Unable to fetch PageSpeed data. Please try again.');
+            throw new Error('Unable to fetch PageSpeed data');
         }
         
         if (data.error) {
             throw new Error(data.error.message || 'Failed to analyze website');
         }
         
-        // Extract scores
+        // Extract scores and display results (same as before)
         const performanceScore = data.lighthouseResult?.categories?.performance?.score * 100 || 0;
         const accessibilityScore = data.lighthouseResult?.categories?.accessibility?.score * 100 || 0;
         const bestPracticesScore = data.lighthouseResult?.categories?.['best-practices']?.score * 100 || 0;
         const seoScore = data.lighthouseResult?.categories?.seo?.score * 100 || 0;
         
-        // Extract metrics
         const audits = data.lighthouseResult?.audits || {};
         const speedIndex = audits['speed-index']?.displayValue || 'N/A';
         const ttfb = audits['server-response-time']?.displayValue || 'N/A';
         const largestContentfulPaint = audits['largest-contentful-paint']?.displayValue || 'N/A';
         const totalBlockingTime = audits['total-blocking-time']?.displayValue || 'N/A';
         
-        // Calculate overall score
         const overallScore = Math.round(
             (performanceScore * 0.5) + 
             (accessibilityScore * 0.2) + 
@@ -1502,37 +1489,18 @@
             (seoScore * 0.15)
         );
         
-        // Generate improvement suggestions
         const suggestions = [];
-        if (performanceScore < 90) {
-            suggestions.push('📸 Optimize images (compress & use modern formats like WebP)');
-        }
-        if (ttfb !== 'N/A' && parseFloat(ttfb) > 200) {
-            suggestions.push(`⚡ Improve server response time (currently ${ttfb}) - consider caching`);
-        }
-        if (speedIndex !== 'N/A' && parseFloat(speedIndex) > 3) {
-            suggestions.push(`🚀 Reduce speed index (currently ${speedIndex}) - optimize above-the-fold content`);
-        }
-        if (largestContentfulPaint !== 'N/A' && parseFloat(largestContentfulPaint) > 2.5) {
-            suggestions.push(`🎯 Improve Largest Contentful Paint (currently ${largestContentfulPaint}) - optimize your main content`);
-        }
-        if (accessibilityScore < 90) {
-            suggestions.push('♿ Improve accessibility - add alt text, ensure proper contrast, use semantic HTML');
-        }
-        if (bestPracticesScore < 90) {
-            suggestions.push('✨ Follow web best practices - use HTTPS, avoid console errors, add meta descriptions');
-        }
-        if (seoScore < 90) {
-            suggestions.push('🔍 Improve SEO - add meta tags, proper heading structure, and descriptive titles');
-        }
+        if (performanceScore < 90) suggestions.push('📸 Optimize images (compress & use modern formats like WebP)');
+        if (ttfb !== 'N/A' && parseFloat(ttfb) > 200) suggestions.push(`⚡ Improve server response time (currently ${ttfb}) - consider caching`);
+        if (speedIndex !== 'N/A' && parseFloat(speedIndex) > 3) suggestions.push(`🚀 Reduce speed index (currently ${speedIndex}) - optimize above-the-fold content`);
+        if (largestContentfulPaint !== 'N/A' && parseFloat(largestContentfulPaint) > 2.5) suggestions.push(`🎯 Improve Largest Contentful Paint (currently ${largestContentfulPaint})`);
+        if (accessibilityScore < 90) suggestions.push('♿ Improve accessibility - add alt text, ensure proper contrast');
+        if (bestPracticesScore < 90) suggestions.push('✨ Follow web best practices - use HTTPS, avoid console errors');
+        if (seoScore < 90) suggestions.push('🔍 Improve SEO - add meta tags, proper heading structure');
         
-        // Calculate leaderboard comparison
-        const avgScore = leaderboard.length > 0 ? 
-            Math.round(leaderboard.reduce((sum, s) => sum + (s.score || 0), 0) / leaderboard.length) : 0;
-        const topScore = leaderboard.length > 0 ? 
-            Math.max(...leaderboard.map(s => s.score || 0)) : 0;
+        const avgScore = leaderboard.length > 0 ? Math.round(leaderboard.reduce((sum, s) => sum + (s.score || 0), 0) / leaderboard.length) : 0;
+        const topScore = leaderboard.length > 0 ? Math.max(...leaderboard.map(s => s.score || 0)) : 0;
         
-        // Create result display
         const resultHtml = `
             <div style="text-align: center; max-width: 600px; margin: 0 auto;">
                 <h3>📊 PageSpeed Test Results</h3>
@@ -1569,43 +1537,41 @@
                 </div>
                 
                 <div style="text-align: left; background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
-                    <h4 style="margin-bottom: 10px;">⏱️ Key Metrics</h4>
-                    <ul style="list-style: none; padding-left: 0;">
-                        <li style="margin: 8px 0;">⚡ <strong>Speed Index:</strong> ${speedIndex}</li>
-                        <li style="margin: 8px 0;">🚀 <strong>Server Response (TTFB):</strong> ${ttfb}</li>
-                        <li style="margin: 8px 0;">🎨 <strong>Largest Contentful Paint:</strong> ${largestContentfulPaint}</li>
-                        <li style="margin: 8px 0;">⏰ <strong>Total Blocking Time:</strong> ${totalBlockingTime}</li>
+                    <h4>⏱️ Key Metrics</h4>
+                    <ul style="margin-top: 10px;">
+                        <li>⚡ Speed Index: ${speedIndex}</li>
+                        <li>🚀 Server Response (TTFB): ${ttfb}</li>
+                        <li>🎨 Largest Contentful Paint: ${largestContentfulPaint}</li>
+                        <li>⏰ Total Blocking Time: ${totalBlockingTime}</li>
                     </ul>
                 </div>
                 
                 ${suggestions.length > 0 ? `
                 <div style="text-align: left; background: #fff3cd; padding: 15px; border-radius: 10px; margin: 15px 0;">
-                    <h4 style="margin-bottom: 10px; color: #856404;">💡 Improvement Suggestions:</h4>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        ${suggestions.map(s => `<li style="margin: 5px 0;">${s}</li>`).join('')}
+                    <h4 style="color: #856404;">💡 Improvement Suggestions:</h4>
+                    <ul style="margin-top: 10px;">
+                        ${suggestions.map(s => `<li>${s}</li>`).join('')}
                     </ul>
                 </div>
                 ` : `
                 <div style="text-align: left; background: #d4edda; padding: 15px; border-radius: 10px; margin: 15px 0;">
-                    <h4 style="margin-bottom: 10px; color: #155724;">🎉 Excellent Work!</h4>
-                    <p>Your website scores well across all categories! Keep up the great work!</p>
+                    <h4 style="color: #155724;">🎉 Excellent Work!</h4>
+                    <p>Your website scores well across all categories!</p>
                 </div>
                 `}
                 
                 <div style="text-align: left; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin: 15px 0; color: white;">
-                    <h4 style="margin-bottom: 10px;">📈 Leaderboard Comparison:</h4>
-                    <ul style="margin: 0; padding-left: 20px;">
+                    <h4>📈 Leaderboard Comparison:</h4>
+                    <ul style="margin-top: 10px;">
                         <li>Your Score: <strong>${overallScore}/100</strong></li>
                         <li>Average Score: <strong>${avgScore}/100</strong></li>
                         <li>Top Score: <strong>${topScore}/100</strong></li>
-                        <li style="margin-top: 5px;">${overallScore > avgScore ? '🎉 You\'re above average!' : overallScore === avgScore ? '📊 You\'re right at the average!' : '💪 Keep improving!'}</li>
                     </ul>
                 </div>
                 
                 <div style="margin-top: 20px;">
-                    <p style="margin-bottom: 15px;">✨ <strong>Want to get on the official leaderboard?</strong></p>
-                    <button class="github-btn" onclick="window.open('https://forms.gle/eQmcwZo1AjXVNM7DA', '_blank')" style="margin-right: 10px;">
-                        📝 Submit via Google Form
+                    <button class="github-btn" onclick="window.open('https://pagespeed.web.dev/analysis?url=${encodeURIComponent(cleanUrl)}', '_blank')">
+                        🔍 View Full Report
                     </button>
                     <button class="copy-btn" onclick="showMessage('', 0)">
                         ❌ Close
@@ -1619,20 +1585,49 @@
         
     } catch (error) {
         console.error('PageSpeed API Error:', error);
-        showMessage(`
-            <div style="text-align: center;">
-                <h3>❌ Could Not Test Website</h3>
-                <p>Error: ${error.message}</p>
-                <p style="margin-top: 15px;">Possible reasons:</p>
-                <ul style="text-align: left; display: inline-block;">
-                    <li>Website is not accessible (check URL)</li>
-                    <li>Network connectivity issues</li>
-                    <li>Try again in a few seconds</li>
-                </ul>
-                <br><br>
-                <button class="copy-btn" onclick="showMessage('', 0)">Close</button>
-            </div>
-        `, 0);
+        
+        // Check if it's a quota error
+        if (error.message === 'QUOTA_EXCEEDED' || (error.message && error.message.includes('quota'))) {
+            showMessage(`
+                <div style="text-align: center;">
+                    <h3>⚠️ Daily API Limit Reached</h3>
+                    <p>The PageSpeed Insights API has reached its daily limit.</p>
+                    <p style="margin-top: 15px;">But don't worry! You can still test your website using:</p>
+                    
+                    <div style="margin: 20px 0;">
+                        <button class="github-btn" onclick="window.open('https://pagespeed.web.dev/analysis?url=${encodeURIComponent(cleanUrl)}', '_blank')" style="margin: 5px;">
+                            🔍 Google PageSpeed Insights
+                        </button>
+                        <button class="copy-btn" onclick="window.open('https://gtmetrix.com/?url=${encodeURIComponent(cleanUrl)}', '_blank')" style="margin: 5px;">
+                            ⚡ GTmetrix
+                        </button>
+                        <button class="copy-btn" onclick="window.open('https://web.dev/measure/?url=${encodeURIComponent(cleanUrl)}', '_blank')" style="margin: 5px;">
+                            📊 Web.dev Measure
+                        </button>
+                    </div>
+                    
+                    <p style="margin-top: 15px;"><strong>Your website URL:</strong><br>${cleanUrl}</p>
+                    <p style="margin-top: 10px; font-size: 0.9em;">The official PageSpeed Insights tool provides detailed performance reports with actionable recommendations.</p>
+                    
+                    <br>
+                    <button class="copy-btn" onclick="showMessage('', 0)">Close</button>
+                </div>
+            `, 0);
+        } else {
+            showMessage(`
+                <div style="text-align: center;">
+                    <h3>❌ Could Not Test Website</h3>
+                    <p>Error: ${error.message}</p>
+                    <p style="margin-top: 15px;">Try using the official tools:</p>
+                    <div style="margin: 15px 0;">
+                        <button class="github-btn" onclick="window.open('https://pagespeed.web.dev/analysis?url=${encodeURIComponent(cleanUrl)}', '_blank')">
+                            🔍 Test with PageSpeed Insights
+                        </button>
+                    </div>
+                    <button class="copy-btn" onclick="showMessage('', 0)">Close</button>
+                </div>
+            `, 0);
+        }
     }
 }
 
