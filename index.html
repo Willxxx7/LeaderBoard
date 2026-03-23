@@ -1398,17 +1398,208 @@
             `, 0);
         }
 
-        function testSite() {
-            const url = document.getElementById('testUrl').value;
-            if (!url.includes('github.io')) {
-                showMessage('❌ Please use a GitHub Pages URL', 3000);
-                return;
-            }
-            
-            const score = Math.floor(Math.random() * 20) + 75;
-            showMessage(`🤖 Test result: ${score}/100<br>Submit via Google Form for official ranking!`, 5000);
-            document.getElementById('testUrl').value = '';
+       async function testSite() {
+    const url = document.getElementById('testUrl').value;
+    
+    if (!url) {
+        showMessage('❌ Please enter a website URL', 3000);
+        return;
+    }
+    
+    // Clean and validate URL
+    let cleanUrl = url.trim();
+    if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+        cleanUrl = 'https://' + cleanUrl;
+    }
+    
+    // Show loading message
+    showMessage(`
+        <div style="text-align: center;">
+            <div>🚀 Testing ${cleanUrl}...</div>
+            <div style="margin-top: 10px;">⏳ Analyzing performance with PageSpeed Insights</div>
+            <div class="loading-spinner" style="margin: 20px auto; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #4facfe; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        </div>
+    `, 0);
+    
+    try {
+        // Call PageSpeed Insights API (no API key required for basic usage)
+        const apiUrl = `https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(cleanUrl)}&strategy=mobile&category=performance&category=accessibility&category=best-practices&category=seo`;
+        
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error.message || 'Failed to analyze website');
         }
+        
+        // Extract scores
+        const performanceScore = data.lighthouseResult?.categories?.performance?.score * 100 || 0;
+        const accessibilityScore = data.lighthouseResult?.categories?.accessibility?.score * 100 || 0;
+        const bestPracticesScore = data.lighthouseResult?.categories?.['best-practices']?.score * 100 || 0;
+        const seoScore = data.lighthouseResult?.categories?.seo?.score * 100 || 0;
+        
+        // Extract metrics
+        const audits = data.lighthouseResult?.audits || {};
+        const speedIndex = audits['speed-index']?.displayValue || 'N/A';
+        const ttfb = audits['server-response-time']?.displayValue || 'N/A';
+        const largestContentfulPaint = audits['largest-contentful-paint']?.displayValue || 'N/A';
+        const totalBlockingTime = audits['total-blocking-time']?.displayValue || 'N/A';
+        
+        // Calculate overall score (weighted: 50% performance, 20% accessibility, 15% best practices, 15% SEO)
+        const overallScore = Math.round(
+            (performanceScore * 0.5) + 
+            (accessibilityScore * 0.2) + 
+            (bestPracticesScore * 0.15) + 
+            (seoScore * 0.15)
+        );
+        
+        // Generate improvement suggestions
+        const suggestions = [];
+        if (performanceScore < 90) {
+            suggestions.push('📸 Optimize images (compress & use modern formats like WebP)');
+        }
+        if (ttfb !== 'N/A' && parseFloat(ttfb) > 200) {
+            suggestions.push(`⚡ Improve server response time (currently ${ttfb}) - consider caching`);
+        }
+        if (speedIndex !== 'N/A' && parseFloat(speedIndex) > 3) {
+            suggestions.push(`🚀 Reduce speed index (currently ${speedIndex}) - optimize above-the-fold content`);
+        }
+        if (largestContentfulPaint !== 'N/A' && parseFloat(largestContentfulPaint) > 2.5) {
+            suggestions.push(`🎯 Improve Largest Contentful Paint (currently ${largestContentfulPaint}) - optimize your main content`);
+        }
+        if (accessibilityScore < 90) {
+            suggestions.push('♿ Improve accessibility - add alt text, ensure proper contrast, use semantic HTML');
+        }
+        if (bestPracticesScore < 90) {
+            suggestions.push('✨ Follow web best practices - use HTTPS, avoid console errors, add meta descriptions');
+        }
+        if (seoScore < 90) {
+            suggestions.push('🔍 Improve SEO - add meta tags, proper heading structure, and descriptive titles');
+        }
+        
+        // Calculate leaderboard comparison
+        const avgScore = leaderboard.length > 0 ? 
+            Math.round(leaderboard.reduce((sum, s) => sum + (s.score || 0), 0) / leaderboard.length) : 0;
+        const topScore = leaderboard.length > 0 ? 
+            Math.max(...leaderboard.map(s => s.score || 0)) : 0;
+        
+        // Create result display
+        const resultHtml = `
+            <div style="text-align: center; max-width: 600px; margin: 0 auto;">
+                <h3>📊 PageSpeed Test Results</h3>
+                <div style="font-size: 64px; margin: 20px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold;">
+                    ${overallScore}/100
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 10px;">
+                        <div style="font-size: 0.9em; color: #666;">🚀 Performance</div>
+                        <div style="font-size: 24px; font-weight: bold; color: ${performanceScore >= 90 ? '#28a745' : performanceScore >= 50 ? '#ffc107' : '#dc3545'}">
+                            ${Math.round(performanceScore)}
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 10px;">
+                        <div style="font-size: 0.9em; color: #666;">♿ Accessibility</div>
+                        <div style="font-size: 24px; font-weight: bold; color: ${accessibilityScore >= 90 ? '#28a745' : accessibilityScore >= 50 ? '#ffc107' : '#dc3545'}">
+                            ${Math.round(accessibilityScore)}
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 10px;">
+                        <div style="font-size: 0.9em; color: #666;">✨ Best Practices</div>
+                        <div style="font-size: 24px; font-weight: bold; color: ${bestPracticesScore >= 90 ? '#28a745' : bestPracticesScore >= 50 ? '#ffc107' : '#dc3545'}">
+                            ${Math.round(bestPracticesScore)}
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 10px;">
+                        <div style="font-size: 0.9em; color: #666;">🔍 SEO</div>
+                        <div style="font-size: 24px; font-weight: bold; color: ${seoScore >= 90 ? '#28a745' : seoScore >= 50 ? '#ffc107' : '#dc3545'}">
+                            ${Math.round(seoScore)}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: left; background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px;">⏱️ Key Metrics</h4>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li style="margin: 8px 0;">⚡ <strong>Speed Index:</strong> ${speedIndex}</li>
+                        <li style="margin: 8px 0;">🚀 <strong>Server Response (TTFB):</strong> ${ttfb}</li>
+                        <li style="margin: 8px 0;">🎨 <strong>Largest Contentful Paint:</strong> ${largestContentfulPaint}</li>
+                        <li style="margin: 8px 0;">⏰ <strong>Total Blocking Time:</strong> ${totalBlockingTime}</li>
+                    </ul>
+                </div>
+                
+                ${suggestions.length > 0 ? `
+                <div style="text-align: left; background: #fff3cd; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #856404;">💡 Improvement Suggestions:</h4>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        ${suggestions.map(s => `<li style="margin: 5px 0;">${s}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : `
+                <div style="text-align: left; background: #d4edda; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #155724;">🎉 Excellent Work!</h4>
+                    <p>Your website scores well across all categories! Keep up the great work!</p>
+                </div>
+                `}
+                
+                <div style="text-align: left; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin: 15px 0; color: white;">
+                    <h4 style="margin-bottom: 10px;">📈 Leaderboard Comparison:</h4>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li>Your Score: <strong>${overallScore}/100</strong></li>
+                        <li>Average Score: <strong>${avgScore}/100</strong></li>
+                        <li>Top Score: <strong>${topScore}/100</strong></li>
+                        <li style="margin-top: 5px;">${overallScore > avgScore ? '🎉 You\'re above average!' : overallScore === avgScore ? '📊 You\'re right at the average!' : '💪 Keep improving!'}</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <p style="margin-bottom: 15px;">✨ <strong>Want to get on the official leaderboard?</strong></p>
+                    <button class="github-btn" onclick="window.open('https://forms.gle/eQmcwZo1AjXVNM7DA', '_blank')" style="margin-right: 10px;">
+                        📝 Submit via Google Form
+                    </button>
+                    <button class="copy-btn" onclick="showMessage('', 0)">
+                        ❌ Close
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        showMessage(resultHtml, 0);
+        
+        // Save test result to localStorage for reference
+        const testResults = JSON.parse(localStorage.getItem('hotbeans-test-results') || '[]');
+        testResults.unshift({
+            url: cleanUrl,
+            score: overallScore,
+            metrics: { speedIndex, ttfb, largestContentfulPaint, totalBlockingTime },
+            timestamp: new Date().toISOString()
+        });
+        // Keep only last 10 tests
+        if (testResults.length > 10) testResults.pop();
+        localStorage.setItem('hotbeans-test-results', JSON.stringify(testResults));
+        
+        document.getElementById('testUrl').value = '';
+        
+    } catch (error) {
+        console.error('PageSpeed API Error:', error);
+        showMessage(`
+            <div style="text-align: center;">
+                <h3>❌ Could Not Test Website</h3>
+                <p>Error: ${error.message}</p>
+                <p style="margin-top: 15px;">Possible reasons:</p>
+                <ul style="text-align: left; display: inline-block;">
+                    <li>Website is not accessible (check URL)</li>
+                    <li>Website blocks automated testing</li>
+                    <li>Network connectivity issues</li>
+                    <li>Invalid URL format</li>
+                </ul>
+                <br><br>
+                <button class="copy-btn" onclick="showMessage('', 0)">Close</button>
+            </div>
+        `, 0);
+    }
+}
 
         // ========== INITIAL LOAD ==========
         // Auto-refresh pending
