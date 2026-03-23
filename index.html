@@ -1427,11 +1427,24 @@
     `, 0);
     
     try {
-        // Call PageSpeed Insights API (no API key required for basic usage)
+        // Use a CORS proxy to avoid CORS issues
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
         const apiUrl = `https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(cleanUrl)}&strategy=mobile&category=performance&category=accessibility&category=best-practices&category=seo`;
         
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        // Try direct fetch first (may work in some browsers)
+        let data;
+        try {
+            const response = await fetch(apiUrl);
+            data = await response.json();
+            console.log('Direct fetch successful');
+        } catch (corsError) {
+            console.log('Direct fetch failed, trying proxy...');
+            // If CORS error, try with proxy
+            const proxyResponse = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+            const text = await proxyResponse.text();
+            data = JSON.parse(text);
+            console.log('Proxy fetch successful');
+        }
         
         if (data.error) {
             throw new Error(data.error.message || 'Failed to analyze website');
