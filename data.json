@@ -4,31 +4,31 @@
       "name": "Wills site (v2)",
       "site": "https://willxxx7.github.io/hot-beans-web",
       "repo": "https://willxxx7.github.io/hot-beans-web/",
-      "score": 74,
+      "score": 75,
       "speedIndex": "2.0s",
-      "ttfb": "359ms",
+      "ttfb": "172ms",
       "avatar": "🧑‍💻",
       "dateAdded": "2026-01-31",
       "lastTested": "2026-07-12",
       "lastUpdated": "2026-01-31",
       "version": 2,
-      "previousScore": 91,
-      "speed": "1.9s"
+      "previousScore": 74,
+      "speed": "1.7s"
     },
     {
       "name": "Wills site",
       "site": "https://willxxx7.github.io/hot-beans-web",
       "repo": "https://willxxx7.github.io/hot-beans-web/",
-      "score": 93,
+      "score": 80,
       "speedIndex": "1.7s",
-      "ttfb": "163ms",
+      "ttfb": "393ms",
       "avatar": "🧑‍💻",
       "dateAdded": "2026-01-31",
       "lastTested": "2026-07-12",
       "lastUpdated": "2026-01-31",
       "version": 55,
-      "previousScore": 90,
-      "speed": "2.4s"
+      "previousScore": 93,
+      "speed": "1.2s"
     }
   ],
   "pending": [],
@@ -36,7 +36,7 @@
   "totalEntries": 3,
   "publishedBy": "Teacher",
   "publishedAt": "2026-01-31T04:32:50.053Z",
-  "lastChecked": "2026-07-12T10:42:01.131Z",
+  "lastChecked": "2026-07-12T11:41:11.425Z",
   "totalStudents": 2,
-  "lastTested": "2026-07-12T10:42:01.223Z"
+  "lastTested": "2026-07-12T11:41:11.466Z"
 }
